@@ -2,1812 +2,885 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>N3XT</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAADklEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==">
 <style>
-  @keyframes n3spin { to { transform: rotate(360deg); } }
-  @keyframes n3fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes n3slideIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes n3heroIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes n3pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
-  @keyframes n3modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-  @keyframes n3overlayIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes n3shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
-  @keyframes n3notifIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes n3notifOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
-  @keyframes n3dlPulse { 0%,100% { letter-spacing: .14em; } 50% { letter-spacing: .22em; } }
-  @keyframes n3blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
-  @keyframes n3barGrow { 0% { width: 0%; } 100% { width: 100%; } }
-  @keyframes n3dotFade { 0%,80%,100% { opacity: 0; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+  @keyframes spin      { to { transform: rotate(360deg); } }
+  @keyframes fadeUp    { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideIn   { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes pulse     { 0%,100%{opacity:1}50%{opacity:.4} }
+  @keyframes modalIn   { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes overlayIn { from{opacity:0}to{opacity:1} }
+  @keyframes shake     { 0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)} }
+  @keyframes notifIn   { from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:translateX(0)} }
+  @keyframes notifOut  { from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(36px)} }
+  @keyframes dotFade   { 0%,80%,100%{opacity:0;transform:scale(.7)}40%{opacity:1;transform:scale(1)} }
+  @keyframes bannerScroll { 0%{transform:translateX(0)}100%{transform:translateX(-50%)} }
+  @keyframes diPop     { from{opacity:0;transform:translateX(-50%) scale(.8)}to{opacity:1;transform:translateX(-50%) scale(1)} }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-
-  #n3xt-app {
-    min-height: 100vh;
-    background: #fff;
-    color: #000;
-    display: flex;
-    flex-direction: column;
-    animation: n3fadeIn .5s ease both;
+  :root {
+    --bg:#fff; --fg:#000; --fg2:#555; --fg3:#999;
+    --border:rgba(0,0,0,.09); --border2:rgba(0,0,0,.05);
+    --surface:#f5f5f7; --surface2:#e8e8ed;
+    --accent:#fa2d48; --green:#1a7a3a;
+    --radius:14px; --rsm:8px;
+    --shadow:0 2px 16px rgba(0,0,0,.07);
+    --shadowlg:0 8px 40px rgba(0,0,0,.13);
   }
-
-  @media (prefers-color-scheme: dark) {
-    #n3xt-app { background: #000; color: #fff; }
-    .n3-input { background: #000; color: #fff; border-color: #fff; }
-    .n3-input::placeholder { color: #888; }
-    .n3-nav { border-bottom-color: #fff; background: #000; }
-    .n3-result-item { border-bottom-color: #222; }
-    .n3-result-item:hover { background: #111; }
-    .n3-viewer { border-left-color: #333; }
-    .n3-track { border-bottom-color: #222; }
-    .n3-track:hover { background: #111; }
-    .n3-meta-pill { border-color: #fff; color: #fff; }
-    .n3-back { color: #fff; border-color: #fff; }
-    .n3-btn { background: #fff; color: #000; border-color: #fff; }
-    .n3-section-label { color: #888; }
-    .n3-result-artist { color: #888; }
-    .n3-track-dur { color: #888; }
-    .n3-track-artist { color: #888; }
-    .n3-viewer-artist { color: #888; }
-    .n3-viewer-meta-label { color: #888; }
-    .n3-status { color: #888; }
-    .n3-empty-sub { color: #888; }
-    .n3-result-source { color: #888; }
-    .n3-results { border-right-color: #333; }
-    .n3-section-label { border-bottom-color: #222; }
-    .n3-modal-box { background: #000; color: #fff; border-color: #333; }
-    .n3-modal-input { background: #111; color: #fff; border-color: #444; }
-    .n3-modal-input::placeholder { color: #555; }
-    .n3-dl-btn { border-color: #fff; color: #fff; background: rgba(255,255,255,0.08); }
-    .n3-dl-btn:hover { background: #fff; color: #000; }
-    .n3-notif { background: #111; color: #fff; border-color: #333; }
-    /* Dark mode: make meta pills and modal visible */
-    .n3-meta-pill { background: rgba(255,255,255,0.08); }
+  .dark {
+    --bg:#000; --fg:#fff; --fg2:#aaa; --fg3:#555;
+    --border:rgba(255,255,255,.1); --border2:rgba(255,255,255,.06);
+    --surface:#111; --surface2:#1c1c1e;
+    --shadow:0 2px 16px rgba(0,0,0,.5);
+    --shadowlg:0 8px 40px rgba(0,0,0,.6);
   }
 
-  /* AI search loader */
-  .n3-ai-loader {
-    padding: 28px 40px 20px;
-    animation: n3fadeIn .3s ease both;
-  }
-  .n3-ai-loader-label {
-    font-size: 10px;
-    letter-spacing: .22em;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .n3-ai-dots {
-    display: inline-flex;
-    gap: 4px;
-    align-items: center;
-  }
-  .n3-ai-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #888;
-    animation: n3dotFade 1.2s ease infinite;
-  }
-  .n3-ai-dot:nth-child(2) { animation-delay: .2s; }
-  .n3-ai-dot:nth-child(3) { animation-delay: .4s; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--fg);transition:background .25s,color .25s;-webkit-font-smoothing:antialiased}
 
-  .n3-ai-bar-wrap {
-    width: 100%;
-    height: 1px;
-    background: #eee;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  @media (prefers-color-scheme: dark) { .n3-ai-bar-wrap { background: #222; } }
-  .n3-ai-bar {
-    height: 100%;
-    background: #000;
-    width: 0%;
-  }
-  @media (prefers-color-scheme: dark) { .n3-ai-bar { background: #fff; } }
+  #app{min-height:100dvh;display:flex;flex-direction:column;animation:fadeUp .4s ease both}
 
-  .n3-ai-steps {
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: #bbb;
-    line-height: 2;
-    min-height: 88px;
-  }
-  .n3-ai-step {
-    opacity: 0;
-    transition: opacity .4s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .n3-ai-step.visible { opacity: 1; }
-  .n3-ai-step-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #ccc;
-    flex-shrink: 0;
-    transition: background .3s;
-  }
-  .n3-ai-step.done .n3-ai-step-dot { background: #000; }
-  @media (prefers-color-scheme: dark) { .n3-ai-step.done .n3-ai-step-dot { background: #fff; } }
+  /* Nav */
+  .nav{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .wordmark{font-size:15px;font-weight:700;letter-spacing:-.02em}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .icon-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s,transform .1s;flex-shrink:0}
+  .icon-btn:hover{background:var(--surface2);transform:scale(1.08)}
+  .tos-link{font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--fg3);cursor:pointer;background:none;border:none;font-family:inherit;transition:color .15s;padding:4px}
+  .tos-link:hover{color:var(--fg)}
 
-  .n3-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-    height: 60px;
-    border-bottom: 1px solid #000;
-    flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 10;
-  }
+  /* Banner */
+  .banner{background:var(--green);color:#fff;height:28px;overflow:hidden;display:flex;align-items:center;flex-shrink:0;position:sticky;top:52px;z-index:19}
+  .banner-track{display:flex;white-space:nowrap;animation:bannerScroll 32s linear infinite}
+  .banner-text{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:0 48px;flex-shrink:0}
 
-  .n3-wordmark {
-    font-size: 13px;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    font-weight: 400;
-    animation: n3heroIn .6s ease both;
-  }
+  /* Hero */
+  .hero{padding:52px 24px 36px;border-bottom:1px solid var(--border)}
+  .hero-title{font-size:clamp(48px,9vw,96px);font-weight:700;letter-spacing:-.05em;line-height:.92;margin-bottom:6px}
+  .hero-sub{font-size:13px;color:var(--fg3);margin-bottom:26px;letter-spacing:.01em}
 
-  .n3-nav-right {
-    font-size: 11px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: #888;
-    animation: n3heroIn .6s .1s ease both;
-  }
+  /* Search */
+  .search-wrap{display:flex;flex-direction:column;gap:10px;max-width:540px}
+  .search-row{display:flex}
+  .search-input{flex:1;height:44px;border:1px solid var(--border);border-right:none;border-radius:var(--rsm) 0 0 var(--rsm);background:var(--surface);color:var(--fg);padding:0 16px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,background .15s}
+  .search-input:focus{border-color:var(--accent);background:var(--bg)}
+  .search-input::placeholder{color:var(--fg3)}
+  .search-btn{height:44px;padding:0 20px;background:var(--fg);color:var(--bg);border:1px solid var(--fg);border-radius:0 var(--rsm) var(--rsm) 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;white-space:nowrap}
+  .search-btn:hover{opacity:.8}
+  .search-btn:active{transform:scale(.97)}
 
-  .n3-hero {
-    padding: 80px 40px 60px;
-    border-bottom: 1px solid #000;
-    flex-shrink: 0;
-    animation: n3heroIn .7s .05s ease both;
-  }
-  @media (prefers-color-scheme: dark) {
-    .n3-hero { border-bottom-color: #333; }
-  }
+  /* Filters */
+  .filter-row{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{height:28px;padding:0 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--fg2);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .chip:hover{background:var(--surface2);transform:scale(1.02)}
+  .chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
-  .n3-hero-title {
-    font-size: clamp(60px, 10vw, 120px);
-    font-weight: 400;
-    letter-spacing: -.04em;
-    line-height: .9;
-    margin-bottom: 40px;
-    animation: n3heroIn .8s .08s ease both;
-  }
+  /* Layout */
+  .body{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0}
 
-  .n3-search-row {
-    display: flex;
-    gap: 0;
-    max-width: 600px;
-    animation: n3fadeIn .8s .2s ease both;
-  }
+  /* Results */
+  .results-panel{border-right:1px solid var(--border);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sec-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--fg3);padding:14px 22px 8px;border-bottom:1px solid var(--border2);position:sticky;top:0;background:var(--bg);z-index:5}
+  .status-line{font-size:11px;color:var(--fg3);padding:7px 22px 10px}
+  .result-item{display:flex;align-items:center;gap:13px;padding:13px 22px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .1s;animation:slideIn .28s ease both}
+  .result-item:hover{background:var(--surface)}
+  .result-item:active{background:var(--surface2)}
+  .result-thumb{width:46px;height:46px;object-fit:cover;border-radius:var(--rsm);flex-shrink:0;background:var(--surface2);display:block}
+  .result-thumb-ph{width:46px;height:46px;border-radius:var(--rsm);background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .result-thumb-ph span{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--fg3)}
+  .result-info{min-width:0;flex:1}
+  .result-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .result-artist{font-size:11px;color:var(--fg3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .result-badges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+  .badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--fg3)}
+  .b-ig{background:#833ab4;color:#fff}.b-tg{background:#2ca5e0;color:#fff}.b-am{background:#fc3c44;color:#fff}.b-yt{background:#ff0000;color:#fff}.b-sp{background:#1db954;color:#fff}
 
-  .n3-input {
-    flex: 1;
-    height: 48px;
-    border: 1px solid #000;
-    border-right: none;
-    background: #fff;
-    color: #000;
-    padding: 0 18px;
-    font-size: 13px;
-    letter-spacing: .04em;
-    font-family: inherit;
-    outline: none;
-    border-radius: 0;
-    transition: border-color .2s;
-  }
-  .n3-input:focus { border-color: #555; }
+  /* Empty */
+  .empty{padding:56px 22px;animation:fadeUp .35s ease both}
+  .empty-title{font-size:22px;font-weight:600;letter-spacing:-.03em;margin-bottom:6px}
+  .empty-sub{font-size:13px;color:var(--fg3);line-height:1.6}
 
-  .n3-btn {
-    height: 48px;
-    padding: 0 24px;
-    background: #000;
-    color: #fff;
-    border: 1px solid #000;
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity .15s, transform .12s;
-    white-space: nowrap;
-  }
-  .n3-btn:hover { opacity: .75; }
-  .n3-btn:active { transform: scale(.97); }
+  /* Viewer */
+  .viewer-panel{overflow-y:auto;padding:28px 24px;-webkit-overflow-scrolling:touch}
+  .viewer-cover{width:100%;aspect-ratio:1;max-width:200px;object-fit:cover;border-radius:16px;background:var(--surface2);display:block;margin-bottom:18px;box-shadow:var(--shadowlg);transition:transform .3s;animation:fadeUp .35s ease both}
+  .viewer-cover:hover{transform:scale(1.02)}
+  .viewer-cover-ph{width:100%;aspect-ratio:1;max-width:200px;border-radius:16px;background:var(--surface2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;animation:fadeUp .35s ease both}
+  .viewer-cover-ph span{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--fg3);text-transform:uppercase}
+  .viewer-title{font-size:clamp(18px,3vw,28px);font-weight:700;letter-spacing:-.03em;line-height:1.05;margin-bottom:4px;word-break:break-word}
+  .viewer-artist{font-size:13px;color:var(--fg3);margin-bottom:14px}
+  .meta-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+  .mpill{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--surface2);color:var(--fg2)}
+  .dl-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border-radius:20px;background:var(--fg);color:var(--bg);border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:opacity .15s,transform .1s;margin-bottom:22px}
+  .dl-btn:hover{opacity:.8}
+  .dl-btn:active{transform:scale(.97)}
+  .dl-btn.loading{opacity:.5;cursor:default;pointer-events:none}
+  .tl-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--fg3);margin-bottom:10px;display:block}
 
-  .n3-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    flex: 1;
-    min-height: 0;
-  }
+  /* Tracks */
+  .track{display:flex;align-items:center;gap:11px;padding:9px 6px;border-bottom:1px solid var(--border2);transition:background .1s;animation:fadeUp .22s ease both;border-radius:var(--rsm);margin:0 -6px}
+  .track:last-child{border-bottom:none}
+  .track:hover{background:var(--surface)}
+  .play-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--fg3);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:var(--fg3);transition:all .15s;padding:0;font-family:inherit}
+  .play-btn:hover{background:var(--fg);color:var(--bg);border-color:var(--fg);transform:scale(1.1)}
+  .play-btn.playing{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .track-no{font-size:11px;color:var(--fg3);width:18px;text-align:right;flex-shrink:0}
+  .track-info{flex:1;min-width:0}
+  .track-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track-artist{font-size:11px;color:var(--fg3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track-dur{font-size:11px;color:var(--fg3);flex-shrink:0}
 
-  .n3-results {
-    border-right: 1px solid #000;
-    overflow-y: auto;
-  }
+  /* Single badge */
+  .single-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fa2d48,#ff6b35);color:#fff;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:6px}
+  .single-banner{background:linear-gradient(135deg,var(--accent),#ff6b35);border-radius:12px;padding:14px 16px;margin-bottom:16px;color:#fff;display:flex;align-items:center;gap:12px;animation:fadeUp .3s ease both}
+  .single-banner-icon{font-size:28px;flex-shrink:0}
+  .single-banner-info{min-width:0}
+  .single-banner-title{font-size:15px;font-weight:700;letter-spacing:-.02em;margin-bottom:2px}
+  .single-banner-sub{font-size:11px;opacity:.85}
+  .result-item.single-item{border-left:3px solid var(--accent)}
+  .result-item.single-item .result-thumb,.result-item.single-item .result-thumb-ph{border-radius:50%;width:42px;height:42px}
 
-  .n3-section-label {
-    font-size: 10px;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: #888;
-    padding: 20px 40px 12px;
-    border-bottom: 1px solid #eee;
-  }
+  /* Spinner */
+  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--fg);border-radius:50%;animation:spin .7s linear infinite;margin:50px auto}
 
-  .n3-status {
-    font-size: 11px;
-    letter-spacing: .08em;
-    color: #888;
-    padding: 10px 40px 16px;
-    animation: n3fadeIn .3s ease both;
-  }
+  /* Dynamic Island */
+  #now-playing{display:none;position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:999;background:#111;color:#fff;border-radius:26px;padding:0 14px;height:34px;align-items:center;gap:9px;cursor:default;box-shadow:0 4px 20px rgba(0,0,0,.55);min-width:110px;white-space:nowrap;user-select:none;border:1px solid rgba(255,255,255,.07);animation:diPop .35s cubic-bezier(.34,1.56,.64,1) both}
+  #now-playing.show{display:flex}
+  .np-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease infinite;flex-shrink:0}
+  .np-text{font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+  .np-stop{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;padding:0}
+  .np-stop:hover{background:rgba(255,255,255,.28)}
 
-  .n3-result-item {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px 40px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background .12s, transform .12s;
-    animation: n3slideIn .35s ease both;
-  }
-  .n3-result-item:hover { background: #f7f7f7; transform: translateX(3px); }
-  .n3-result-item:active { transform: scale(.99); }
+  /* AI Loader */
+  .ai-loader{padding:22px 22px 14px;animation:fadeUp .3s ease both}
+  .ai-lbl{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--fg3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .ai-dots{display:inline-flex;gap:3px}
+  .ai-dot{width:3px;height:3px;border-radius:50%;background:var(--fg3);animation:dotFade 1.2s ease infinite}
+  .ai-dot:nth-child(2){animation-delay:.2s}.ai-dot:nth-child(3){animation-delay:.4s}
+  .ai-bar-wrap{width:100%;height:1px;background:var(--border);margin-bottom:12px;overflow:hidden}
+  .ai-bar{height:100%;background:var(--fg);width:0%}
+  .ai-steps{font-size:11px;color:var(--fg3);line-height:2;min-height:76px}
+  .ai-step{opacity:0;transition:opacity .3s;display:flex;align-items:center;gap:7px}
+  .ai-step.vis{opacity:1}
+  .ai-step-dot{width:4px;height:4px;border-radius:50%;background:var(--fg3);flex-shrink:0;transition:background .3s}
+  .ai-step.done .ai-step-dot{background:var(--green)}
 
-  .n3-result-thumb {
-    width: 52px;
-    height: 52px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #eee;
-    display: block;
-    transition: transform .2s;
-  }
-  .n3-result-item:hover .n3-result-thumb { transform: scale(1.05); }
+  /* Modal */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;animation:overlayIn .2s ease both;padding:20px}
+  .overlay.on{display:flex}
+  .mbox{background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:20px;padding:30px 26px 26px;max-width:390px;width:100%;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1) both;box-shadow:var(--shadowlg)}
+  .micon{font-size:26px;margin-bottom:12px}
+  .mtitle{font-size:19px;font-weight:700;letter-spacing:-.03em;margin-bottom:7px}
+  .mbody{font-size:12px;color:var(--fg2);line-height:1.65;margin-bottom:20px}
+  .minput{width:100%;height:44px;border:1.5px solid var(--border);border-radius:var(--rsm);background:var(--surface);color:var(--fg);padding:0 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:9px;transition:border-color .2s}
+  .minput:focus{border-color:var(--accent)}
+  .minput::placeholder{color:var(--fg3)}
+  .minput.shake{animation:shake .35s ease}
+  .merr{font-size:11px;color:var(--accent);margin-bottom:10px;min-height:16px}
+  .mbtns{display:flex;gap:9px}
+  .msubmit{flex:1;height:44px;background:var(--fg);color:var(--bg);border:none;border-radius:var(--rsm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+  .msubmit:hover{opacity:.8}
+  .mcancel{height:44px;padding:0 16px;background:var(--surface);color:var(--fg2);border:1px solid var(--border);border-radius:var(--rsm);font-size:13px;cursor:pointer;font-family:inherit;transition:background .15s}
+  .mcancel:hover{background:var(--surface2)}
 
-  .n3-result-info { min-width: 0; }
-  .n3-result-name {
-    font-size: 13px;
-    letter-spacing: .02em;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .n3-result-artist {
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: #888;
-    margin-top: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .n3-result-source {
-    font-size: 10px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #bbb;
-    margin-top: 4px;
-  }
+  /* Val steps */
+  .val-steps{text-align:left;margin-top:4px}
+  .vs{font-size:12px;color:var(--fg3);padding:5px 0;display:flex;align-items:center;gap:9px;opacity:0;transition:opacity .35s}
+  .vs.vis{opacity:1}.vs.done{color:var(--fg)}
+  .vs-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
+  .vs.done .vs-dot{background:var(--green)}
 
-  .n3-empty {
-    padding: 80px 40px;
-    text-align: left;
-    animation: n3fadeIn .4s ease both;
-  }
-  .n3-empty-title {
-    font-size: 28px;
-    letter-spacing: -.03em;
-    font-weight: 400;
-    margin-bottom: 14px;
-  }
-  .n3-empty-sub {
-    font-size: 13px;
-    letter-spacing: .02em;
-    color: #888;
-    line-height: 1.7;
-  }
+  /* Panel */
+  .panel-btns{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+  .pbtn{border:1px solid var(--border);border-radius:var(--rsm);background:var(--surface);padding:13px 15px;text-align:left;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;display:flex;flex-direction:column;gap:3px}
+  .pbtn:hover{background:var(--surface2);border-color:var(--fg3)}
+  .pbtn-t{font-size:13px;font-weight:600;color:var(--fg)}
+  .pbtn-s{font-size:11px;color:var(--fg3)}
+  .song-sel{width:100%;height:40px;border:1.5px solid var(--border);border-radius:var(--rsm);background:var(--surface);color:var(--fg);font-size:12px;font-family:inherit;padding:0 10px;outline:none}
+  .plbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);margin-bottom:4px;animation:pulse 1.5s ease infinite}
+  .pbar-wrap{width:100%;height:2px;background:var(--border);margin-top:8px;border-radius:2px;overflow:hidden}
+  .pbar{height:100%;background:var(--fg);width:0%;border-radius:2px}
+  .psteps{margin-top:8px}
+  .pstep{font-size:11px;color:var(--fg3);padding:3px 0;opacity:0;transition:opacity .35s;display:flex;align-items:center;gap:7px}
+  .pstep.vis{opacity:1}.pstep.done{color:var(--fg2)}
 
-  .n3-viewer {
-    overflow-y: auto;
-    padding: 40px;
-  }
+  /* Notifs */
+  #notif-stack{position:fixed;bottom:22px;right:18px;z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .notif{background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:14px;padding:11px 15px;font-size:11px;max-width:270px;pointer-events:auto;box-shadow:var(--shadowlg);line-height:1.5}
+  .notif.entering{animation:notifIn .3s ease both}.notif.leaving{animation:notifOut .3s ease both}
+  .notif-t{font-size:12px;font-weight:600;margin-bottom:3px}
+  .notif-b{color:var(--fg3)}
+  .n-err .notif-t{color:var(--accent)}.n-ok .notif-t{color:var(--green)}
 
-  .n3-viewer-empty {
-    padding: 80px 0;
-    animation: n3fadeIn .4s ease both;
-  }
+  .cl-item{font-size:12px;color:var(--fg2);line-height:1.7;padding:2px 0}
+  .cl-item strong{color:var(--fg)}
 
-  .n3-viewer-cover {
-    width: 100%;
-    aspect-ratio: 1;
-    max-width: 260px;
-    object-fit: cover;
-    display: block;
-    background: #eee;
-    margin-bottom: 28px;
-    animation: n3fadeIn .5s ease both;
-    transition: transform .3s, box-shadow .3s;
-  }
-  .n3-viewer-cover:hover { transform: scale(1.02); box-shadow: 0 8px 30px rgba(0,0,0,.15); }
+  /* TOS */
+  .tos-body{max-height:52vh;overflow-y:auto;font-size:12px;color:var(--fg2);line-height:1.7;margin-bottom:18px}
+  .tos-body h3{font-size:13px;font-weight:600;color:var(--fg);margin:14px 0 5px}
+  .tos-body p{margin-bottom:7px}
+  .tos-ok{width:100%;height:44px;background:var(--fg);color:var(--bg);border:none;border-radius:var(--rsm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+  .tos-ok:hover{opacity:.8}
 
-  .n3-viewer-title {
-    font-size: clamp(22px, 4vw, 36px);
-    letter-spacing: -.04em;
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 10px;
-    word-break: break-word;
-    animation: n3fadeIn .5s .05s ease both;
-  }
-
-  .n3-viewer-artist {
-    font-size: 13px;
-    letter-spacing: .04em;
-    color: #888;
-    margin-bottom: 20px;
-    animation: n3fadeIn .5s .1s ease both;
-  }
-
-  .n3-meta-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-    animation: n3fadeIn .5s .15s ease both;
-  }
-
-  .n3-meta-pill {
-    font-size: 10px;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    border: 1px solid #000;
-    padding: 6px 12px;
-    color: #000;
-    transition: background .15s, color .15s;
-    cursor: default;
-  }
-  .n3-meta-pill:hover { background: #000; color: #fff; }
-
-  .n3-viewer-meta-label {
-    font-size: 10px;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 16px;
-    display: block;
-    animation: n3fadeIn .5s .2s ease both;
-  }
-
-  .n3-track {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid #eee;
-    transition: background .12s, padding-left .12s;
-    animation: n3fadeIn .3s ease both;
-  }
-  .n3-track:last-child { border-bottom: none; }
-  .n3-track:hover { background: #f9f9f9; padding-left: 6px; }
-
-  .n3-track-no {
-    font-size: 11px;
-    letter-spacing: .06em;
-    color: #bbb;
-    width: 20px;
-    flex-shrink: 0;
-    text-align: right;
-  }
-  .n3-track-info { flex: 1; min-width: 0; }
-  .n3-track-name {
-    font-size: 13px;
-    letter-spacing: .02em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .n3-track-artist {
-    font-size: 11px;
-    color: #888;
-    letter-spacing: .03em;
-    margin-top: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .n3-track-dur {
-    font-size: 11px;
-    color: #888;
-    letter-spacing: .04em;
-    flex-shrink: 0;
-  }
-
-  .n3-back {
-    font-size: 10px;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    border: 1px solid #000;
-    padding: 8px 16px;
-    background: none;
-    cursor: pointer;
-    font-family: inherit;
-    color: #000;
-    margin-bottom: 28px;
-    display: none;
-    transition: opacity .15s, transform .12s;
-  }
-  .n3-back:hover { opacity: .6; transform: translateX(-3px); }
-
-  .n3-spinner {
-    width: 20px;
-    height: 20px;
-    border: 1px solid #ccc;
-    border-top-color: #000;
-    border-radius: 50%;
-    animation: n3spin .8s linear infinite;
-    margin: 40px auto;
-  }
-
-  /* Download button */
-  .n3-dl-btn {
-    display: inline-block;
-    margin-top: 20px;
-    margin-bottom: 8px;
-    font-size: 10px;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    border: 1px solid #000;
-    padding: 10px 22px;
-    background: none;
-    color: #000;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .15s, color .15s, transform .12s;
-    animation: n3fadeIn .5s .25s ease both;
-  }
-  .n3-dl-btn:hover { background: #000; color: #fff; }
-  .n3-dl-btn:active { transform: scale(.97); }
-  .n3-dl-btn.downloading {
-    animation: n3dlPulse .9s ease infinite;
-    opacity: .7;
-    cursor: default;
-    pointer-events: none;
-  }
-
-  /* Password Modal */
-  .n3-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    animation: n3overlayIn .2s ease both;
-  }
-  .n3-modal-overlay.active { display: flex; }
-
-  .n3-modal-box {
-    background: #fff;
-    color: #000;
-    border: 1px solid #ddd;
-    padding: 44px 40px 36px;
-    max-width: 440px;
-    width: calc(100% - 40px);
-    animation: n3modalIn .25s ease both;
-    position: relative;
-  }
-
-  .n3-modal-icon {
-    font-size: 28px;
-    margin-bottom: 18px;
-    letter-spacing: 0;
-  }
-
-  .n3-modal-title {
-    font-size: 18px;
-    letter-spacing: -.03em;
-    font-weight: 400;
-    margin-bottom: 14px;
-    line-height: 1.2;
-  }
-
-  .n3-modal-body {
-    font-size: 12px;
-    letter-spacing: .03em;
-    color: #666;
-    line-height: 1.75;
-    margin-bottom: 28px;
-  }
-  @media (prefers-color-scheme: dark) { .n3-modal-body { color: #aaa; } }
-
-  .n3-modal-input {
-    width: 100%;
-    height: 44px;
-    border: 1px solid #ccc;
-    background: #fafafa;
-    color: #000;
-    padding: 0 16px;
-    font-size: 13px;
-    letter-spacing: .04em;
-    font-family: inherit;
-    outline: none;
-    margin-bottom: 14px;
-    transition: border-color .2s;
-    border-radius: 0;
-  }
-  .n3-modal-input:focus { border-color: #888; }
-  .n3-modal-input.shake { animation: n3shake .35s ease; }
-
-  .n3-modal-err {
-    font-size: 11px;
-    letter-spacing: .06em;
-    color: #c00;
-    margin-bottom: 14px;
-    min-height: 16px;
-    transition: opacity .2s;
-  }
-
-  .n3-modal-btns {
-    display: flex;
-    gap: 12px;
-  }
-
-  .n3-modal-submit {
-    flex: 1;
-    height: 44px;
-    background: #000;
-    color: #fff;
-    border: 1px solid #000;
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity .15s;
-  }
-  .n3-modal-submit:hover { opacity: .75; }
-
-  .n3-modal-cancel {
-    height: 44px;
-    padding: 0 20px;
-    background: none;
-    color: #888;
-    border: 1px solid #ccc;
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity .15s;
-  }
-  .n3-modal-cancel:hover { opacity: .6; }
-  @media (prefers-color-scheme: dark) {
-    .n3-modal-submit { background: #fff; color: #000; border-color: #fff; }
-    .n3-modal-cancel { border-color: #444; }
-  }
-
-  /* Notification toast */
-  #n3-notif-stack {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    pointer-events: none;
-  }
-
-  .n3-notif {
-    background: #fff;
-    color: #000;
-    border: 1px solid #ddd;
-    padding: 14px 18px;
-    font-size: 11px;
-    letter-spacing: .06em;
-    max-width: 300px;
-    line-height: 1.55;
-    pointer-events: auto;
-    box-shadow: 0 4px 20px rgba(0,0,0,.1);
-  }
-  .n3-notif.entering { animation: n3notifIn .3s ease both; }
-  .n3-notif.leaving { animation: n3notifOut .3s ease both; }
-  .n3-notif-title { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 5px; font-weight: 500; }
-  .n3-notif-body { color: #666; }
-  @media (prefers-color-scheme: dark) { .n3-notif-body { color: #aaa; } }
-  .n3-notif-err .n3-notif-title { color: #c00; }
-  .n3-notif-ok .n3-notif-title { color: #080; }
-
-  /* Validation steps inside modal */
-  .n3-val-steps { text-align:left; }
-  .n3-val-step {
-    font-size: 12px;
-    letter-spacing: .04em;
-    color: #888;
-    padding: 5px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity .4s;
-  }
-  .n3-val-step.visible { opacity: 1; }
-  .n3-val-step.done { color: #000; }
-  @media (prefers-color-scheme: dark) { .n3-val-step.done { color: #fff; } }
-  .n3-val-step-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #ccc;
-    flex-shrink: 0;
-    transition: background .3s;
-  }
-  .n3-val-step.done .n3-val-step-dot { background: #000; }
-  @media (prefers-color-scheme: dark) { .n3-val-step.done .n3-val-step-dot { background: #fff; } }
-
-  /* Download panel */
-  .n3-panel-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-  .n3-panel-btn {
-    border: 1px solid #ccc;
-    background: none;
-    padding: 14px 18px;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .15s, border-color .15s;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .n3-panel-btn:hover { background: #f5f5f5; border-color: #000; }
-  @media (prefers-color-scheme: dark) {
-    .n3-panel-btn { border-color: #333; }
-    .n3-panel-btn:hover { background: #111; border-color: #fff; }
-  }
-  .n3-panel-btn-title { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #000; }
-  @media (prefers-color-scheme: dark) { .n3-panel-btn-title { color: #fff; } }
-  .n3-panel-btn-sub { font-size: 10px; letter-spacing: .06em; color: #888; }
-
-  .n3-song-select {
-    width: 100%;
-    height: 40px;
-    border: 1px solid #ccc;
-    background: #fafafa;
-    color: #000;
-    font-size: 12px;
-    font-family: inherit;
-    padding: 0 10px;
-    outline: none;
-    border-radius: 0;
-  }
-  @media (prefers-color-scheme: dark) {
-    .n3-song-select { background: #111; color: #fff; border-color: #444; }
-  }
-
-  .n3-panel-prog-label {
-    font-size: 11px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 4px;
-    animation: n3pulse 1.5s ease infinite;
-  }
-  .n3-panel-prog-steps { margin-top: 10px; }
-  .n3-panel-prog-step {
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: #aaa;
-    padding: 3px 0;
-    opacity: 0;
-    transition: opacity .4s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .n3-panel-prog-step.visible { opacity: 1; }
-  .n3-panel-prog-step.done { color: #555; }
-  @media (prefers-color-scheme: dark) { .n3-panel-prog-step.done { color: #999; } }
-
-  /* Orange scrolling banner */
-  .n3-banner {
-    background: #1a7a3a;
-    color: #fff;
-    height: 34px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    position: sticky;
-    top: 60px;
-    z-index: 9;
-  }
-  .n3-banner-track {
-    display: flex;
-    white-space: nowrap;
-    animation: n3bannerScroll 22s linear infinite;
-  }
-  .n3-banner-text {
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    padding: 0 60px;
-    flex-shrink: 0;
-  }
-  @keyframes n3bannerScroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  /* Play button on tracks */
-  .n3-play-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid currentColor;
-    background: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 9px;
-    color: #000;
-    transition: background .15s, color .15s, transform .12s;
-    padding: 0;
-    font-family: inherit;
-  }
-  .n3-play-btn:hover { background: #000; color: #fff; transform: scale(1.1); }
-  .n3-play-btn.playing { background: #000; color: #fff; }
-  @media (prefers-color-scheme: dark) {
-    .n3-play-btn { color: #fff; }
-    .n3-play-btn:hover { background: #fff; color: #000; }
-    .n3-play-btn.playing { background: #fff; color: #000; }
-  }
-
-  @media (max-width: 700px) {
-    .n3-body { grid-template-columns: 1fr; }
-    .n3-results { border-right: none; border-bottom: 1px solid #eee; }
-    .n3-nav { padding: 0 20px; }
-    .n3-hero { padding: 50px 20px 40px; }
-    .n3-result-item { padding: 16px 20px; }
-    .n3-section-label, .n3-status { padding-left: 20px; padding-right: 20px; }
-    .n3-empty { padding: 50px 20px; }
-    .n3-viewer { padding: 24px 20px; }
-    #n3-notif-stack { bottom: 16px; right: 16px; }
-    .n3-modal-box { padding: 32px 24px 28px; }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    #n3-now-playing { background: #000 !important; border-top-color: #fff !important; }
-    #n3-np-label { color: #fff !important; }
-    #n3-now-playing button { border-color: #fff !important; color: #fff !important; }
+  /* Mobile */
+  @media(max-width:660px){
+    .body{grid-template-columns:1fr}
+    .results-panel{border-right:none;border-bottom:1px solid var(--border);max-height:48vh}
+    .hero{padding:34px 18px 24px}
+    .viewer-panel{padding:22px 18px}
+    .nav{padding:0 14px}
+    .result-item{padding:12px 18px}
+    .sec-label,.status-line{padding-left:18px;padding-right:18px}
+    .empty{padding:36px 18px}
+    #notif-stack{bottom:14px;right:10px}
+    #now-playing{max-width:calc(100vw - 32px)}
+    .np-text{max-width:130px}
   }
 </style>
 </head>
 <body>
+<div id="app">
 
-<div id="n3xt-app">
-  <nav class="n3-nav">
-    <div class="n3-wordmark">N3XT</div>
-    <div class="n3-nav-right">Album Search</div>
+  <nav class="nav">
+    <span class="wordmark">N3XT</span>
+    <div class="nav-right">
+      <button class="tos-link" onclick="openTOS()">Terms</button>
+      <button class="icon-btn" id="theme-btn">🌙</button>
+    </div>
   </nav>
 
-  <div class="n3-banner">
-    <div class="n3-banner-track">
-      <span class="n3-banner-text">✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp; ✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp;</span>
-      <span class="n3-banner-text">✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp; ✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp;</span>
+  <div class="banner">
+    <div class="banner-track">
+      <span class="banner-text">✓ Almost done fixing — for some users it may already work &nbsp;·&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced &nbsp;·&nbsp; ✓ Almost done fixing — for some users it may already work &nbsp;·&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced &nbsp;·&nbsp;</span>
+      <span class="banner-text">✓ Almost done fixing — for some users it may already work &nbsp;·&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced &nbsp;·&nbsp; ✓ Almost done fixing — for some users it may already work &nbsp;·&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced &nbsp;·&nbsp;</span>
     </div>
   </div>
 
-  <div class="n3-hero">
-    <h1 class="n3-hero-title">N3XT</h1>
-    <div class="n3-search-row">
-      <input id="n3-input" class="n3-input" placeholder="Search albums..." autocomplete="off" spellcheck="false" />
-      <button class="n3-btn" id="n3-btn">Search</button>
+  <div class="hero">
+    <h1 class="hero-title">n3xt.</h1>
+    <p class="hero-sub">Advanced AI Music Discovery</p>
+    <div class="search-wrap">
+      <div class="search-row">
+        <input id="si" class="search-input" placeholder="Search albums, artists..." autocomplete="off" spellcheck="false">
+        <button class="search-btn" id="sb">Search</button>
+      </div>
+      <div class="filter-row" id="filters">
+        <button class="chip on" data-s="all"><span class="chip-dot" style="background:var(--fg2)"></span>All</button>
+        <button class="chip" data-s="Instagram"><span class="chip-dot" style="background:#833ab4"></span>Instagram</button>
+        <button class="chip" data-s="Telegram"><span class="chip-dot" style="background:#2ca5e0"></span>Telegram</button>
+        <button class="chip" data-s="Apple Music"><span class="chip-dot" style="background:#fc3c44"></span>Apple Music</button>
+        <button class="chip" data-s="YouTube Music"><span class="chip-dot" style="background:#ff0000"></span>YouTube Music</button>
+        <button class="chip" data-s="Spotify"><span class="chip-dot" style="background:#1db954"></span>Spotify</button>
+      </div>
     </div>
   </div>
 
-  <div class="n3-body">
-    <div class="n3-results" id="n3-results">
-      <div class="n3-section-label">Results</div>
-      <div class="n3-empty">
-        <div class="n3-empty-title">Search an album.</div>
-        <div class="n3-empty-sub">Type an album name and press search.<br>Click any result to view the tracklist.</div>
+  <div class="body">
+    <div class="results-panel" id="results">
+      <div class="sec-label">Results</div>
+      <div class="empty"><div class="empty-title">Search an album.</div><div class="empty-sub">Type above and press Search.<br>Click any result to view tracklist.</div></div>
+    </div>
+    <div class="viewer-panel" id="viewer">
+      <div class="empty" style="padding:56px 0"><div class="empty-title">Select a result.</div><div class="empty-sub">Tracklist and metadata<br>will appear here.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic Island Now Playing -->
+<div id="now-playing">
+  <span class="np-dot"></span>
+  <span class="np-text" id="np-text">Now Playing</span>
+  <button class="np-stop" onclick="stopCurrentAudio()" title="Stop">■</button>
+</div>
+
+<!-- Auth Modal -->
+<div class="overlay" id="auth-modal">
+  <div class="mbox">
+    <div id="s-pw">
+      <div class="micon">🔐</div>
+      <div class="mtitle">Authorization Required</div>
+      <div class="mbody">This content has been flagged as a restricted unreleased album. Only authorized personnel may access it. Enter your credentials to continue.</div>
+      <input class="minput" id="pw-inp" type="password" placeholder="Enter password..." autocomplete="off">
+      <div class="merr" id="pw-err"></div>
+      <div class="mbtns">
+        <button class="msubmit" id="pw-ok">Confirm</button>
+        <button class="mcancel" id="pw-x">Cancel</button>
       </div>
     </div>
-
-    <div class="n3-viewer" id="n3-viewer">
-      <div class="n3-viewer-empty">
-        <div class="n3-empty-title">Select a result.</div>
-        <div class="n3-empty-sub">Full tracklist and metadata<br>will appear here.</div>
+    <div id="s-val" style="display:none;text-align:center;padding:6px 0">
+      <div class="micon">⚙️</div>
+      <div class="mtitle" style="margin-bottom:14px">Validating Credentials</div>
+      <div class="val-steps" id="val-steps"></div>
+    </div>
+    <div id="s-panel" style="display:none">
+      <div class="micon">✅</div>
+      <div class="mtitle">Access Granted</div>
+      <div class="mbody" id="panel-desc">Select your download option.</div>
+      <div class="panel-btns">
+        <button class="pbtn" id="p-song" onclick="startDL('song')"><span class="pbtn-t">Download Single Track</span><span class="pbtn-s">Choose one song from tracklist</span></button>
+        <button class="pbtn" id="p-album" onclick="startDL('album')"><span class="pbtn-t">Download Full Album</span><span class="pbtn-s">All tracks · ~10 sec</span></button>
       </div>
+      <div id="song-picker" style="display:none;margin-top:13px">
+        <select class="song-sel" id="song-sel"></select>
+        <button class="msubmit" style="margin-top:9px;width:100%" onclick="confirmTrackDL()">Download Selected</button>
+      </div>
+      <div id="prog" style="display:none;margin-top:13px">
+        <div class="plbl" id="prog-lbl"></div>
+        <div class="pbar-wrap"><div class="pbar" id="prog-bar"></div></div>
+        <div class="psteps" id="prog-steps"></div>
+      </div>
+      <button class="mcancel" style="margin-top:14px;width:100%" onclick="closeModal()">Close</button>
     </div>
   </div>
 </div>
 
-<!-- Now Playing Bar -->
-<div id="n3-now-playing" style="display:none;position:fixed;bottom:0;left:0;right:0;height:54px;background:#fff;border-top:1px solid #000;z-index:50;display:none;align-items:center;justify-content:center;gap:14px;animation:n3fadeIn .3s ease both;">
-  <span id="n3-np-pulse" style="width:8px;height:8px;border-radius:50%;background:#1a7a3a;animation:n3pulse 1.2s ease infinite;flex-shrink:0;"></span>
-  <span id="n3-np-label" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;"></span>
-  <button onclick="stopCurrentAudio()" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #000;background:none;color:#000;padding:6px 14px;cursor:pointer;font-family:inherit;flex-shrink:0;">■ Stop</button>
-</div>
-
-<!-- Password Modal -->
-<div class="n3-modal-overlay" id="n3-modal">
-  <div class="n3-modal-box" id="n3-modal-box">
-
-    <!-- Step 1: password entry -->
-    <div id="n3-modal-step-pw">
-      <div class="n3-modal-icon">🔒</div>
-      <div class="n3-modal-title">Authorization Required</div>
-      <div class="n3-modal-body">
-        These albums have been detected in our systems as leaked albums — not officially released. Only authorized personnel may access this content. Enter your credentials to continue.
-      </div>
-      <input class="n3-modal-input" id="n3-modal-input" type="password" placeholder="Enter password..." autocomplete="off" />
-      <div class="n3-modal-err" id="n3-modal-err"></div>
-      <div class="n3-modal-btns">
-        <button class="n3-modal-submit" id="n3-modal-submit">Confirm</button>
-        <button class="n3-modal-cancel" id="n3-modal-cancel">Cancel</button>
-      </div>
+<!-- TOS Modal -->
+<div class="overlay" id="tos-modal">
+  <div class="mbox">
+    <div class="micon">📋</div>
+    <div class="mtitle">Terms of Service</div>
+    <div class="tos-body">
+      <p>Last updated: 2026. By using N3XT you agree to the following terms.</p>
+      <h3>1. Purpose</h3>
+      <p>N3XT is a music discovery platform providing access to album metadata, tracklists, and audio previews sourced from Apple Music, streaming platforms, and community-shared content. N3XT does not host any audio files directly.</p>
+      <h3>2. Leaked &amp; Unreleased Content</h3>
+      <p>Some content on N3XT originates from unofficial sources (Instagram, Telegram). This content is shared for informational purposes only. N3XT does not claim ownership of any copyrighted material. Users access unreleased content at their own discretion.</p>
+      <h3>3. Authorization System</h3>
+      <p>Certain restricted content requires credentials to access. By entering your credentials you confirm you are authorized personnel or have obtained proper permissions.</p>
+      <h3>4. Audio Previews</h3>
+      <p>30-second Apple Music previews are provided under Apple's standard media usage terms. Custom previews are provided as-is. N3XT does not guarantee integrity, completeness, or legality of any audio file.</p>
+      <h3>5. Downloads</h3>
+      <p>Downloaded files are for personal use only. Redistribution, commercial use, or sharing without explicit rights is strictly prohibited.</p>
+      <h3>6. Platform Sources</h3>
+      <p>N3XT aggregates from Apple Music, Spotify, YouTube Music, Instagram, and Telegram. N3XT is not affiliated with any of these platforms. All trademarks belong to their respective owners.</p>
+      <h3>7. Liability</h3>
+      <p>N3XT is provided "as is" without warranties. We are not liable for any damages arising from your use of this platform.</p>
+      <h3>8. Changes</h3>
+      <p>We may update these terms at any time. Continued use constitutes acceptance of updated terms.</p>
     </div>
-
-    <!-- Step 2: validating credentials -->
-    <div id="n3-modal-step-validating" style="display:none;text-align:center;padding:16px 0 8px;">
-      <div class="n3-modal-icon">⚙️</div>
-      <div class="n3-modal-title" style="margin-bottom:18px;">Validating Credentials</div>
-      <div class="n3-val-steps" id="n3-val-steps"></div>
-    </div>
-
-    <!-- Step 3: download panel -->
-    <div id="n3-modal-step-panel" style="display:none;">
-      <div class="n3-modal-icon">✅</div>
-      <div class="n3-modal-title">Access Granted</div>
-      <div class="n3-modal-body" id="n3-panel-desc">Select what you want to download.</div>
-      <div class="n3-panel-btns">
-        <button class="n3-panel-btn" id="n3-panel-song" onclick="startPanelDownload('song')">
-          <span class="n3-panel-btn-title">Download Single Track</span>
-          <span class="n3-panel-btn-sub">Select one song · ~2 min</span>
-        </button>
-        <button class="n3-panel-btn" id="n3-panel-album" onclick="startPanelDownload('album')">
-          <span class="n3-panel-btn-title">Download Full Album</span>
-          <span class="n3-panel-btn-sub">All tracks · ~4 min</span>
-        </button>
-      </div>
-      <!-- song selector (hidden until song chosen) -->
-      <div id="n3-song-picker" style="display:none;margin-top:16px;">
-        <select class="n3-song-select" id="n3-song-select"></select>
-        <button class="n3-modal-submit" style="margin-top:10px;width:100%;" onclick="confirmSongDownload()">Download Selected</button>
-      </div>
-      <div class="n3-panel-progress" id="n3-panel-progress" style="display:none;">
-        <div class="n3-panel-prog-label" id="n3-panel-prog-label"></div>
-        <div class="n3-ai-bar-wrap" style="margin-top:10px;"><div class="n3-ai-bar" id="n3-panel-bar"></div></div>
-        <div class="n3-panel-prog-steps" id="n3-panel-prog-steps"></div>
-      </div>
-      <button class="n3-modal-cancel" style="margin-top:18px;width:100%;" onclick="closeModal()">Close</button>
-    </div>
-
+    <button class="tos-ok" onclick="closeTOS()">I Understand</button>
   </div>
 </div>
 
-<!-- Notification stack -->
-<div id="n3-notif-stack"></div>
+<!-- Update Log Modal -->
+<div class="overlay" id="changelog-modal" style="align-items:flex-end;padding:0">
+  <div class="mbox" style="max-width:100%;width:100%;border-radius:24px 24px 0 0;padding:28px 24px 32px;max-height:82vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">🚀</span>
+        <div>
+          <div style="font-size:16px;font-weight:700;letter-spacing:-.02em">What's New</div>
+          <div style="font-size:11px;color:var(--fg3);margin-top:1px">N3XT — Latest Updates</div>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="closeChangelog()" style="flex-shrink:0">✕</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch">
+
+      <div style="border-left:2px solid var(--accent);padding-left:14px;margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:var(--accent);color:#fff;padding:2px 8px;border-radius:20px">Latest</span>
+          <span style="font-size:11px;color:var(--fg3)">v3.2 · April 2026</span>
+        </div>
+        <div class="cl-item">✦ <strong>YouTube Music & Spotify</strong> — Results now show cross-platform availability across Apple Music, YouTube Music, and Spotify</div>
+        <div class="cl-item">✦ <strong>Singles UI</strong> — Singles now display with a dedicated layout: circular art, single banner, and large play button</div>
+        <div class="cl-item">✦ <strong>No duplicate results</strong> — Songs available on multiple platforms now appear once with all source badges</div>
+      </div>
+
+      <div style="border-left:2px solid var(--border);padding-left:14px;margin-bottom:22px">
+        <div style="font-size:11px;color:var(--fg3);margin-bottom:10px;font-weight:600">v3.1 · March 2026</div>
+        <div class="cl-item">✦ Apple Music previews now playing for more users</div>
+        <div class="cl-item">✦ Filter chips now correctly narrow results by platform</div>
+        <div class="cl-item">✦ Dark mode contrast improvements</div>
+        <div class="cl-item">✦ Dynamic Island now playing indicator added</div>
+      </div>
+
+      <div style="border-left:2px solid var(--border);padding-left:14px;margin-bottom:22px">
+        <div style="font-size:11px;color:var(--fg3);margin-bottom:10px;font-weight:600">v3.0 · February 2026</div>
+        <div class="cl-item">✦ Authorization system for restricted content</div>
+        <div class="cl-item">✦ Telegram source integration</div>
+        <div class="cl-item">✦ Major UI overhaul — split-panel layout</div>
+      </div>
+
+      <div style="border-left:2px solid var(--border);padding-left:14px">
+        <div style="font-size:11px;color:var(--fg3);margin-bottom:10px;font-weight:600">v2.x · 2025</div>
+        <div class="cl-item">✦ Apple Music integration via iTunes API</div>
+        <div class="cl-item">✦ N3XT AI search engine launched</div>
+        <div class="cl-item">✦ Initial release</div>
+      </div>
+
+    </div>
+    <button class="tos-ok" style="margin-top:18px;flex-shrink:0" onclick="closeChangelog()">Got it</button>
+  </div>
+</div>
+
+<div id="notif-stack"></div>
 
 <script>
-  // ── Title lock ──────────────────────────────────────────────
-  document.title = "N3XT";
-  const titleObserver = new MutationObserver(() => { if (document.title !== "N3XT") document.title = "N3XT"; });
-  const titleEl = document.querySelector("title");
-  if (titleEl) titleObserver.observe(titleEl, { childList: true, characterData: true, subtree: true });
+// ── Changelog ─────────────────────────────────────────────────────
+function closeChangelog(){document.getElementById("changelog-modal").classList.remove("on");}
+document.getElementById("changelog-modal").addEventListener("click",e=>{if(e.target===document.getElementById("changelog-modal"))closeChangelog();});
+const CHANGELOG_KEY="n3xt_seen_changelog_v32";
+if(!localStorage.getItem(CHANGELOG_KEY)){
+  setTimeout(()=>{document.getElementById("changelog-modal").classList.add("on");},600);
+  localStorage.setItem(CHANGELOG_KEY,"1");
+}
 
-  // ── Data ──────────────────────────────────────────────────────
-  const fakeAlbum = {
-    id: "fake-sad-boyz",
-    name: "$AD BOYZ 4 LIFE III",
-    artist: "Junior H",
-    year: "2026",
-    source: "Instagram",
-    isLeaked: true,
-    cover: "",
-    tracks: [
-      { name: "24K", artist: "Junior H", length: "3:27" },
-      { name: "Fotos Que Borré", artist: "Junior H, Tito Double P", length: "3:16" },
-      { name: "Bohemio", artist: "Junior H", length: "2:53" },
-      { name: "Vogue Girl", artist: "Junior H, Chino Pacas", length: "3:51" },
-      { name: "Otro Polvo", artist: "Junior H, Gael Valenzuela", length: "3:03" },
-      { name: "Vestido Rojo", artist: "Junior H, Luis R Conriquez", length: "3:57" },
-      { name: "Tormenta", artist: "Junior H", length: "3:06" },
-      { name: "Ya No Llames", artist: "Junior H, Gabriel SSOE", length: "3:00" },
-      { name: "Diez De Copas", artist: "Junior H, Peso Pluma", length: "3:38" },
-      { name: "Noche Eterna", artist: "Junior H", length: "3:21" },
-      { name: "Cicatrices", artist: "Junior H, Jasiel Núñez", length: "3:55" },
-      { name: "Mi Nombre En La Radio", artist: "Junior H", length: "2:53" },
-      { name: "L'Amour", artist: "Junior H, Eslabon Armado", length: "4:04" },
-      { name: "Milán", artist: "Junior H", length: "3:33" },
-      { name: "Reina De Mi Amor", artist: "Junior H", length: "2:39" },
-      { name: "Sirena", artist: "Junior H, Neton Vega", length: "4:17" },
-      { name: "Fin Del Mundo", artist: "Junior H", length: "2:35" }
-    ]
-  };
+// ── Theme ─────────────────────────────────────────────────────────
+let dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const themeBtn = document.getElementById("theme-btn");
+function applyTheme(){ document.body.classList.toggle("dark",dark); themeBtn.textContent=dark?"☀️":"🌙"; }
+applyTheme();
+themeBtn.addEventListener("click",()=>{ dark=!dark; applyTheme(); });
 
-  const bovedeAlbum = {
-    id: "fake-la-boveda",
-    name: "LA BOVEDA",
-    artist: "Natanael Cano",
-    year: "2026",
-    source: "Telegram",
-    isLeaked: true,
-    cover: "https://github.com/Rainfun/Pulse/blob/main/image.png?raw=true",
-    tracks: [
-      { name: "POR AMARTE ASI", artist: "Natanael Cano", length: "3:14" },
-      { name: "AETERNUM", artist: "Natanael Cano", length: "2:58" },
-      { name: "APELATIVO", artist: "Natanael Cano", length: "3:06" },
-      { name: "AUN RECUERDO", artist: "Natanael Cano", length: "2:47" },
-      { name: "CRISTIANO RONALDO", artist: "Natanael Cano", length: "3:21" },
-      { name: "MAR AZUL", artist: "Natanael Cano", length: "2:55" },
-      { name: "PA LA MANA", artist: "Natanael Cano", length: "2:49" },
-      { name: "APREVENIDO", artist: "Natanael Cano", length: "2:18" },
-      { name: "FANTASMA", artist: "Natanael Cano", length: "3:02" },
-      { name: "CIELO ROJO", artist: "Natanael Cano", length: "3:17" },
-      { name: "BOHEMIO SOLITARIO", artist: "Natanael Cano", length: "2:44" },
-      { name: "LO QUE FUI", artist: "Natanael Cano", length: "3:08" },
-      { name: "NOCHE DE LLANTO", artist: "Natanael Cano", length: "2:51" },
-      { name: "CORONA DE ESPINAS", artist: "Natanael Cano", length: "3:33" },
-      { name: "ENTRE SOMBRAS", artist: "Natanael Cano", length: "2:39" },
-      { name: "SIN RETORNO", artist: "Natanael Cano", length: "3:10" },
-      { name: "ULTIMO BRINDIS", artist: "Natanael Cano", length: "2:57" },
-      { name: "LA BOVEDA", artist: "Natanael Cano", length: "4:01" }
-    ]
-  };
+// ── Data ──────────────────────────────────────────────────────────
+const fakeAlbum = {
+  id:"fake-sad", name:"$AD BOYZ 4 LIFE III", artist:"Junior H", year:"2026", source:"Instagram", isLeaked:true, cover:"", dlTime:10000,
+  tracks:[
+    {name:"24K",artist:"Junior H",len:"3:27"},{name:"Fotos Que Borré",artist:"Junior H, Tito Double P",len:"3:16"},
+    {name:"Bohemio",artist:"Junior H",len:"2:53"},{name:"Vogue Girl",artist:"Junior H, Chino Pacas",len:"3:51"},
+    {name:"Otro Polvo",artist:"Junior H, Gael Valenzuela",len:"3:03"},{name:"Vestido Rojo",artist:"Junior H, Luis R Conriquez",len:"3:57"},
+    {name:"Tormenta",artist:"Junior H",len:"3:06"},{name:"Ya No Llames",artist:"Junior H, Gabriel SSOE",len:"3:00"},
+    {name:"Diez De Copas",artist:"Junior H, Peso Pluma",len:"3:38"},{name:"Noche Eterna",artist:"Junior H",len:"3:21"},
+    {name:"Cicatrices",artist:"Junior H, Jasiel Núñez",len:"3:55"},{name:"Mi Nombre En La Radio",artist:"Junior H",len:"2:53"},
+    {name:"L'Amour",artist:"Junior H, Eslabon Armado",len:"4:04"},{name:"Milán",artist:"Junior H",len:"3:33"},
+    {name:"Reina De Mi Amor",artist:"Junior H",len:"2:39"},{name:"Sirena",artist:"Junior H, Neton Vega",len:"4:17"},
+    {name:"Fin Del Mundo",artist:"Junior H",len:"2:35"}
+  ]
+};
+const bovedeAlbum = {
+  id:"fake-boveda", name:"LA BOVEDA", artist:"Natanael Cano", year:"2026", source:"Telegram", isLeaked:true, cover:"https://github.com/Rainfun/Pulse/blob/main/image.png?raw=true", dlTime:10000,
+  tracks:[
+    {name:"POR AMARTE ASI",artist:"Natanael Cano",len:"3:14"},{name:"AETERNUM",artist:"Natanael Cano",len:"2:58"},
+    {name:"APELATIVO",artist:"Natanael Cano",len:"3:06"},{name:"AUN RECUERDO",artist:"Natanael Cano",len:"2:47"},
+    {name:"CRISTIANO RONALDO",artist:"Natanael Cano",len:"3:21"},{name:"MAR AZUL",artist:"Natanael Cano",len:"2:55"},
+    {name:"PA LA MANA",artist:"Natanael Cano",len:"2:49"},{name:"APREVENIDO",artist:"Natanael Cano",len:"2:18"},
+    {name:"FANTASMA",artist:"Natanael Cano",len:"3:02"},{name:"CIELO ROJO",artist:"Natanael Cano",len:"3:17"},
+    {name:"BOHEMIO SOLITARIO",artist:"Natanael Cano",len:"2:44"},{name:"LO QUE FUI",artist:"Natanael Cano",len:"3:08"},
+    {name:"NOCHE DE LLANTO",artist:"Natanael Cano",len:"2:51"},{name:"CORONA DE ESPINAS",artist:"Natanael Cano",len:"3:33"},
+    {name:"ENTRE SOMBRAS",artist:"Natanael Cano",len:"2:39"},{name:"SIN RETORNO",artist:"Natanael Cano",len:"3:10"},
+    {name:"ULTIMO BRINDIS",artist:"Natanael Cano",len:"2:57"},{name:"LA BOVEDA",artist:"Natanael Cano",len:"4:01"}
+  ]
+};
 
-  // ── Refs ──────────────────────────────────────────────────────
-  const inp       = document.getElementById("n3-input");
-  const btn       = document.getElementById("n3-btn");
-  const resultsEl = document.getElementById("n3-results");
-  const viewerEl  = document.getElementById("n3-viewer");
-  const modal     = document.getElementById("n3-modal");
-  const modalInp  = document.getElementById("n3-modal-input");
-  const modalErr  = document.getElementById("n3-modal-err");
-  const modalOk   = document.getElementById("n3-modal-submit");
-  const modalX    = document.getElementById("n3-modal-cancel");
-  const notifStack= document.getElementById("n3-notif-stack");
+const leviticoAlbum = {
+  id:"fake-levitico", name:"LEVITICO", artist:"Peso Pluma", year:"2026", source:"Telegram", isLeaked:false, cover:"", dlTime:10000,
+  tracks:[
+    {name:"BELICE",artist:"Peso Pluma & Eslabon Armado & Tito Double P",len:"3:44",available:true}
+  ],
+  failedCount:16
+};
 
-  // ── Utils ─────────────────────────────────────────────────────
-  function esc(s) {
-    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+// ── Utils ─────────────────────────────────────────────────────────
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function fmtMs(ms){if(!ms)return"--:--";const m=Math.floor(ms/60000),s=String(Math.floor((ms%60000)/1000)).padStart(2,"0");return m+":"+s;}
+function yr(d){return d?String(d).slice(0,4):"—";}
+
+// ── Notifications ─────────────────────────────────────────────────
+const notifStack=document.getElementById("notif-stack");
+function showNotif(title,body,type="err"){
+  const el=document.createElement("div");el.className=`notif n-${type} entering`;
+  el.innerHTML=`<div class="notif-t">${esc(title)}</div><div class="notif-b">${esc(body)}</div>`;
+  notifStack.appendChild(el);
+  setTimeout(()=>{el.classList.remove("entering");el.classList.add("leaving");el.addEventListener("animationend",()=>el.remove(),{once:true});},4200);
+}
+
+// ── TOS ───────────────────────────────────────────────────────────
+function openTOS(){document.getElementById("tos-modal").classList.add("on");}
+function closeTOS(){document.getElementById("tos-modal").classList.remove("on");}
+document.getElementById("tos-modal").addEventListener("click",e=>{if(e.target===document.getElementById("tos-modal"))closeTOS();});
+
+// ── Filters ───────────────────────────────────────────────────────
+let activeFilter="all", lastResultsCache=null;
+document.getElementById("filters").addEventListener("click",e=>{
+  const chip=e.target.closest(".chip"); if(!chip)return;
+  activeFilter=chip.dataset.s;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===chip));
+  if(lastResultsCache) renderResults(...lastResultsCache);
+});
+
+// ── Now Playing ───────────────────────────────────────────────────
+const npEl=document.getElementById("now-playing"), npText=document.getElementById("np-text");
+let currentAudio=null, currentPlayBtn=null, lamourAttempts=0;
+function showNP(name,artist){npText.textContent=(artist?artist+" — ":"")+name; npEl.classList.add("show");}
+function hideNP(){npEl.classList.remove("show");}
+function stopCurrentAudio(){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  if(currentPlayBtn){currentPlayBtn.innerHTML="▶";currentPlayBtn.classList.remove("playing");currentPlayBtn=null;}
+  hideNP();
+}
+function stopPrev(btn){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  if(currentPlayBtn&&currentPlayBtn!==btn){currentPlayBtn.innerHTML="▶";currentPlayBtn.classList.remove("playing");}
+}
+
+// ── Play: SAD BOYZ ────────────────────────────────────────────────
+const DIEZ_URL="https://github.com/Rainfun/Pulse/raw/refs/heads/main/fileunknownlolcustom.wav";
+const LAMOUR_URL="https://github.com/Rainfun/Pulse/raw/refs/heads/main/L'AMOUR.wav";
+
+function playTrack(btn,name,idx){
+  stopPrev(btn);
+  if(btn.classList.contains("playing")){btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;hideNP();return;}
+  if(idx===8){
+    btn.innerHTML="■";btn.classList.add("playing");currentPlayBtn=btn;
+    showNP(name,"Junior H");
+    showNotif("Preview Only",`"${name}" — this is a preview. Full song requires authorization.`,"err");
+    const a=new Audio(DIEZ_URL);currentAudio=a;
+    a.play().catch(()=>{showNotif("Playback Error",`Could not load "${name}".`,"err");btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();});
+    const t=setTimeout(()=>{a.pause();currentAudio=null;btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;showNotif("Error Loading Track",`"${name}" — failed to reproduce the full song. File may be incomplete.`,"err");hideNP();},17000);
+    a.addEventListener("ended",()=>{clearTimeout(t);btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();},{once:true});
+  } else if(idx===12){
+    lamourAttempts++;
+    if(lamourAttempts===1){showNotif("Playback Failed",`"${name}" — audio file not found on server.`,"err");return;}
+    btn.innerHTML="■";btn.classList.add("playing");currentPlayBtn=btn;
+    showNP(name,"Junior H");
+    showNotif("Preview Only",`"${name}" — this is a preview. Full song requires authorization.`,"err");
+    const a=new Audio(LAMOUR_URL);currentAudio=a;
+    a.play().catch(()=>{showNotif("Playback Error",`Could not load "${name}".`,"err");btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();});
+    const t=setTimeout(()=>{a.pause();currentAudio=null;btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;showNotif("Error Loading Track",`"${name}" — failed to reproduce the full song. File may be incomplete.`,"err");hideNP();},17000);
+    a.addEventListener("ended",()=>{clearTimeout(t);btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();},{once:true});
+  } else {
+    showNotif("Playback Failed",`"${name}" — audio file not found on server.`,"err");
   }
-  function fmtMs(ms) {
-    if (!ms) return "--:--";
-    const m = Math.floor(ms / 60000);
-    const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
-    return m + ":" + s;
+}
+
+// ── Play: BOVEDA ──────────────────────────────────────────────────
+const AETERNUM_URL="https://github.com/Rainfun/Pulse/raw/refs/heads/main/xczxczxczxc.wav";
+function playBoveadaTrack(btn,name,idx){
+  stopPrev(btn);
+  if(btn.classList.contains("playing")){btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;hideNP();return;}
+  if(idx===1){
+    btn.innerHTML="■";btn.classList.add("playing");currentPlayBtn=btn;
+    showNP(name,"Natanael Cano");
+    showNotif("Preview Only",`"${name}" — this is a preview. Full song requires authorization.`,"err");
+    const a=new Audio(AETERNUM_URL);currentAudio=a;
+    a.play().catch(()=>{showNotif("Playback Error",`Could not load "${name}".`,"err");btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();});
+    const t=setTimeout(()=>{a.pause();currentAudio=null;btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;showNotif("Error Loading Track",`"${name}" — failed to reproduce the full song. File may be incomplete.`,"err");hideNP();},3000);
+    a.addEventListener("ended",()=>{clearTimeout(t);btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();},{once:true});
+  } else {
+    showNotif("Playback Failed",`"${name}" — audio file not found on server.`,"err");
   }
-  function year(d) { return d ? String(d).slice(0, 4) : "—"; }
+}
 
-  // ── Notifications ─────────────────────────────────────────────
-  function showNotif(title, body, type = "err") {
-    const el = document.createElement("div");
-    el.className = `n3-notif n3-notif-${type} entering`;
-    el.innerHTML = `<div class="n3-notif-title">${esc(title)}</div><div class="n3-notif-body">${esc(body)}</div>`;
-    notifStack.appendChild(el);
-    setTimeout(() => {
-      el.classList.remove("entering");
-      el.classList.add("leaving");
-      el.addEventListener("animationend", () => el.remove(), { once: true });
-    }, 4000);
-  }
+// ── Play: Apple Music preview ─────────────────────────────────────
+function playPreview(btn,url,name,artist){
+  stopPrev(btn);
+  if(btn.classList.contains("playing")){btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;hideNP();return;}
+  btn.innerHTML="■";btn.classList.add("playing");currentPlayBtn=btn;
+  showNP(name,artist||"");
+  const a=new Audio(url);currentAudio=a;
+  a.play().catch(()=>{showNotif("Playback Error",`Could not load preview for "${name}".`,"err");btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();});
+  a.addEventListener("ended",()=>{btn.innerHTML="▶";btn.classList.remove("playing");currentPlayBtn=null;currentAudio=null;hideNP();},{once:true});
+}
 
-  // ── Modal state ───────────────────────────────────────────────
-  let currentLeakedAlbum = null; // tracks which leaked album is open
+// ── Viewer: LEVITICO ─────────────────────────────────────────────
+function openLevitico(){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  const t=leviticoAlbum.tracks[0];
+  const availRow=`
+    <div class="track" style="animation-delay:0s">
+      <button class="play-btn" onclick="showNotif('Playback Failed','&quot;${t.name}&quot; — audio file not found on server.','err')">▶</button>
+      <span class="track-no">1</span>
+      <div class="track-info"><div class="track-name">${esc(t.name)}</div><div class="track-artist">${esc(t.artist)}</div></div>
+      <span class="track-dur">${esc(t.len)}</span>
+    </div>`;
+  const failRow=`
+    <div class="track" style="opacity:.38;pointer-events:none">
+      <button class="play-btn" disabled>▶</button>
+      <span class="track-no">—</span>
+      <div class="track-info"><div class="track-name" style="color:var(--fg3);font-style:italic">Failed to load remaining tracks</div><div class="track-artist" style="color:var(--accent)">Error: Server returned incomplete archive · ${leviticoAlbum.failedCount} tracks unavailable</div></div>
+      <span class="track-dur">—</span>
+    </div>`;
+  document.getElementById("viewer").innerHTML=`
+    <div class="viewer-cover-ph"><span>N3XT</span></div>
+    <div class="viewer-title">${esc(leviticoAlbum.name)}</div>
+    <div class="viewer-artist">${esc(leviticoAlbum.artist)}</div>
+    <div class="meta-row">
+      <span class="mpill" style="background:#2ca5e0;color:#fff">Telegram</span>
+      <span class="mpill">${esc(leviticoAlbum.year)}</span>
+      <span class="mpill">Partial archive</span>
+    </div>
+    <button class="dl-btn" onclick="handleLeakedDL(leviticoAlbum)">⬇ Download Album</button>
+    <span class="tl-label">Tracklist</span>
+    ${availRow}
+    ${failRow}`;
+}
 
-  function openModal(albumObj) {
-    currentLeakedAlbum = albumObj;
-    showStep("pw");
-    modalInp.value = "";
-    modalErr.textContent = "";
-    modal.classList.add("active");
-    setTimeout(() => modalInp.focus(), 120);
-  }
-  function closeModal() {
-    modal.classList.remove("active");
-    // reset to pw step after close animation
-    setTimeout(() => showStep("pw"), 300);
-  }
-  function showStep(step) {
-    document.getElementById("n3-modal-step-pw").style.display         = step === "pw"         ? "" : "none";
-    document.getElementById("n3-modal-step-validating").style.display = step === "validating" ? "" : "none";
-    document.getElementById("n3-modal-step-panel").style.display      = step === "panel"      ? "" : "none";
-  }
+// ── Viewer: fakeAlbum ─────────────────────────────────────────────
+function openFake(){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  const rows=fakeAlbum.tracks.map((t,i)=>`
+    <div class="track" style="animation-delay:${i*.02}s">
+      <button class="play-btn" onclick="playTrack(this,'${t.name.replace(/'/g,"\\'")}',${i})">▶</button>
+      <span class="track-no">${i+1}</span>
+      <div class="track-info"><div class="track-name">${esc(t.name)}</div><div class="track-artist">${esc(t.artist)}</div></div>
+      <span class="track-dur">${esc(t.len)}</span>
+    </div>`).join("");
+  document.getElementById("viewer").innerHTML=`
+    <div class="viewer-cover-ph"><span>N3XT</span></div>
+    <div class="viewer-title">${esc(fakeAlbum.name)}</div>
+    <div class="viewer-artist">${esc(fakeAlbum.artist)}</div>
+    <div class="meta-row">
+      <span class="mpill" style="background:#833ab4;color:#fff">Instagram</span>
+      <span class="mpill">${esc(fakeAlbum.year)}</span>
+      <span class="mpill">${fakeAlbum.tracks.length} tracks</span>
+    </div>
+    <button class="dl-btn" onclick="handleLeakedDL(fakeAlbum)">⬇ Download Album</button>
+    <span class="tl-label">Tracklist</span>${rows}`;
+}
 
-  modalX.addEventListener("click", closeModal);
-  modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
-  modalInp.addEventListener("keydown", e => { if (e.key === "Enter") tryPassword(); });
-  modalOk.addEventListener("click", tryPassword);
+// ── Viewer: Boveda ────────────────────────────────────────────────
+function openBoveda(){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  const rows=bovedeAlbum.tracks.map((t,i)=>`
+    <div class="track" style="animation-delay:${i*.02}s">
+      <button class="play-btn" onclick="playBoveadaTrack(this,'${t.name.replace(/'/g,"\\'")}',${i})">▶</button>
+      <span class="track-no">${i+1}</span>
+      <div class="track-info"><div class="track-name">${esc(t.name)}</div><div class="track-artist">${esc(t.artist)}</div></div>
+      <span class="track-dur">${esc(t.len)}</span>
+    </div>`).join("");
+  document.getElementById("viewer").innerHTML=`
+    <img class="viewer-cover" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy">
+    <div class="viewer-title">${esc(bovedeAlbum.name)}</div>
+    <div class="viewer-artist">${esc(bovedeAlbum.artist)}</div>
+    <div class="meta-row">
+      <span class="mpill" style="background:#2ca5e0;color:#fff">Telegram</span>
+      <span class="mpill">${esc(bovedeAlbum.year)}</span>
+      <span class="mpill">${bovedeAlbum.tracks.length} tracks</span>
+    </div>
+    <button class="dl-btn" onclick="handleLeakedDL(bovedeAlbum)">⬇ Download Album</button>
+    <span class="tl-label">Tracklist</span>${rows}`;
+}
 
-  const VAL_STEPS = [
-    "Connecting to authorization server...",
-    "Encrypting credentials...",
-    "Processing credentials...",
-    "Validating access token...",
-    "Checking personnel registry...",
-    "Access granted."
-  ];
+// ── Viewer: Apple Music ───────────────────────────────────────────
+async function openAlbum(id){
+  document.getElementById("viewer").innerHTML=`<div class="spinner"></div>`;
+  try{
+    const res=await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=song`);
+    const data=await res.json(); const all=data.results||[];
+    const album=all[0]; const tracks=all.slice(1); if(!album)throw new Error();
+    const isSingle=album.collectionType==="Single"||tracks.length===1;
+    const cover=(album.artworkUrl100||"").replace("100x100","600x600");
+    const totalMs=tracks.reduce((a,t)=>a+(t.trackTimeMillis||0),0);
+    const albumName=album.collectionName||"Unknown", artistName=album.artistName||"—";
+    const rows=tracks.length?tracks.map((t,i)=>{
+      const preview=t.previewUrl||"";
+      const sn=(t.trackName||"Unknown").replace(/'/g,"\\'");
+      const sa=(t.artistName||artistName).replace(/'/g,"\\'");
+      const pb=preview?`<button class="play-btn" onclick="playPreview(this,'${preview}','${sn}','${sa}')" title="30s preview">▶</button>`:`<button class="play-btn" style="opacity:.22;cursor:default" disabled>▶</button>`;
+      return`<div class="track" style="animation-delay:${i*.02}s">${pb}<span class="track-no">${i+1}</span><div class="track-info"><div class="track-name">${esc(t.trackName||"Unknown")}</div><div class="track-artist">${esc(t.artistName||artistName)}</div></div><span class="track-dur">${fmtMs(t.trackTimeMillis)}</span></div>`;
+    }).join(""):`<div class="empty-sub" style="padding:14px 0">No tracks found.</div>`;
 
-  function tryPassword() {
-    const val = modalInp.value.trim();
-    if (!val) { modalErr.textContent = "Password is required."; return; }
-
-    if (val.toLowerCase() !== "admin") {
-      modalErr.textContent = "Incorrect password. Access denied.";
-      modalInp.classList.remove("shake");
-      void modalInp.offsetWidth;
-      modalInp.classList.add("shake");
-      modalInp.value = "";
-      setTimeout(() => modalInp.classList.remove("shake"), 400);
-      return;
-    }
-
-    // Correct password — show validating screen
-    showStep("validating");
-    const valStepsEl = document.getElementById("n3-val-steps");
-    valStepsEl.innerHTML = "";
-    const stepEls = VAL_STEPS.map(text => {
-      const d = document.createElement("div");
-      d.className = "n3-val-step";
-      d.innerHTML = `<span class="n3-val-step-dot"></span><span>${text}</span>`;
-      valStepsEl.appendChild(d);
-      return d;
-    });
-
-    const stepDelay = 120;
-    stepEls.forEach((el, i) => {
-      setTimeout(() => {
-        el.classList.add("visible");
-        if (i > 0) stepEls[i - 1].classList.add("done");
-        if (i === stepEls.length - 1) {
-          el.classList.add("done");
-          // After last step, open the panel
-          setTimeout(() => openPanel(), 200);
-        }
-      }, i * stepDelay + 300);
-    });
-  }
-
-  function openPanel() {
-    showStep("panel");
-    document.getElementById("n3-panel-progress").style.display = "none";
-    document.getElementById("n3-song-picker").style.display = "none";
-    document.getElementById("n3-panel-song").disabled = false;
-    document.getElementById("n3-panel-album").disabled = false;
-
-    // Populate song selector if we have track data
-    const sel = document.getElementById("n3-song-select");
-    sel.innerHTML = "";
-    if (currentLeakedAlbum && currentLeakedAlbum.tracks) {
-      currentLeakedAlbum.tracks.forEach((t, i) => {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = `${i + 1}. ${t.name}`;
-        sel.appendChild(opt);
-      });
-    }
-
-    const desc = document.getElementById("n3-panel-desc");
-    desc.textContent = currentLeakedAlbum ? `"${currentLeakedAlbum.name}" — select your download option below.` : "Select your download option below.";
-  }
-
-  function startPanelDownload(type) {
-    if (type === "song") {
-      document.getElementById("n3-song-picker").style.display = "";
-      document.getElementById("n3-panel-progress").style.display = "none";
-      return;
-    }
-    // Full album
-    runPanelProgress("album");
-  }
-
-  function confirmSongDownload() {
-    document.getElementById("n3-song-picker").style.display = "none";
-    runPanelProgress("song");
-  }
-
-  const SONG_STEPS = [
-    "Locating track in secure vault...",
-    "Decrypting audio file...",
-    "Connecting to distribution node...",
-    "Fetching audio stream from database...",
-    "Verifying file integrity...",
-    "Preparing download package...",
-    "Finalizing transfer..."
-  ];
-  const ALBUM_STEPS = [
-    "Authenticating download session...",
-    "Locating album in secure vault...",
-    "Decrypting audio archive...",
-    "Connecting to primary distribution node...",
-    "Fetching tracks from database — 1 of 18...",
-    "Fetching tracks from database — 6 of 18...",
-    "Fetching tracks from database — 12 of 18...",
-    "Fetching tracks from database — 18 of 18...",
-    "Compressing audio archive...",
-    "Verifying file checksums...",
-    "Packaging download bundle...",
-    "Preparing secure transfer...",
-    "Transfer initializing..."
-  ];
-
-  function runPanelProgress(type) {
-    const isSong = type === "song";
-    const totalMs = isSong ? 10000 : 10000; // 10 seconds
-    const steps = isSong ? SONG_STEPS : ALBUM_STEPS;
-    const label = isSong ? "Downloading track..." : "Downloading full album...";
-    const albumName = currentLeakedAlbum ? currentLeakedAlbum.name : "Album";
-    const songName = isSong && currentLeakedAlbum ? currentLeakedAlbum.tracks[document.getElementById("n3-song-select").value]?.name || "Track" : null;
-
-    // Disable buttons
-    document.getElementById("n3-panel-song").disabled = true;
-    document.getElementById("n3-panel-album").disabled = true;
-
-    const progEl = document.getElementById("n3-panel-progress");
-    const progLabel = document.getElementById("n3-panel-prog-label");
-    const progBar = document.getElementById("n3-panel-bar");
-    const progSteps = document.getElementById("n3-panel-prog-steps");
-
-    progEl.style.display = "";
-    progLabel.textContent = label;
-    progBar.style.width = "0%";
-    progSteps.innerHTML = "";
-
-    // Render step els
-    const stepEls = steps.map(text => {
-      const d = document.createElement("div");
-      d.className = "n3-panel-prog-step";
-      d.innerHTML = `<span>›</span><span>${text}</span>`;
-      progSteps.appendChild(d);
-      return d;
-    });
-
-    // Animate bar
-    const barStart = performance.now();
-    let barFrame;
-    function animBar() {
-      const pct = Math.min((performance.now() - barStart) / totalMs * 100, 95);
-      progBar.style.width = pct + "%";
-      if (pct < 95) barFrame = requestAnimationFrame(animBar);
-    }
-    barFrame = requestAnimationFrame(animBar);
-
-    // Show steps evenly
-    const stepInterval = (totalMs * 0.85) / steps.length;
-    stepEls.forEach((el, i) => {
-      setTimeout(() => {
-        el.classList.add("visible");
-        if (i > 0) stepEls[i - 1].classList.add("done");
-      }, i * stepInterval);
-    });
-
-    // 50/50 success or fail at the end
-    setTimeout(() => {
-      cancelAnimationFrame(barFrame);
-      progBar.style.transition = "width .3s ease";
-      progBar.style.width = "100%";
-      if (stepEls.length) stepEls[stepEls.length - 1].classList.add("done");
-
-      setTimeout(() => {
-        closeModal();
-        const success = true;
-        if (success && !isSong) {
-          // Detect mobile
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          const ZIP_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/n3xt.github.io%20$AD%20BOYZ%204%20LIFE%20III.zip";
-          showNotif("Download Complete", `"${albumName}" — your album has been downloaded successfully.`, "ok");
-          if (isMobile) {
-            // On mobile open the file URL directly — browser will prompt save/open
-            window.location.href = ZIP_URL;
-          } else {
-            fetch(ZIP_URL)
-              .then(r => r.blob())
-              .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "$AD BOYZ 4 LIFE III.zip";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                setTimeout(() => URL.revokeObjectURL(url), 10000);
-              })
-              .catch(() => {
-                window.open(ZIP_URL, "_blank");
-              });
-          }
-        } else if (isSong) {
-          showNotif("Download Failed", `"${songName}" — transfer error. The file could not be retrieved from the server.`, "err");
-        } else {
-          showNotif("Download Failed", `"${albumName}" — connection lost during transfer. Please try again later.`, "err");
-        }
-      }, 600);
-    }, totalMs);
-  }
-
-  // ── Download simulation (regular albums) ──────────────────────
-  function simulateDownload(albumName, btnEl) {
-    btnEl.textContent = "Downloading...";
-    btnEl.classList.add("downloading");
-    setTimeout(() => {
-      btnEl.textContent = "Download Album";
-      btnEl.classList.remove("downloading");
-      showNotif("Download Failed", `"${albumName}" could not be downloaded. Please try again later.`, "err");
-    }, 2200 + Math.random() * 800);
-  }
-
-  // ── Search ────────────────────────────────────────────────────
-  btn.addEventListener("click", doSearch);
-  inp.addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
-
-  const AI_STEPS = [
-    "Initializing neural search engine...",
-    "Parsing query semantics...",
-    "Scanning music databases...",
-    "Cross-referencing release metadata...",
-    "Analyzing catalog index...",
-    "Fetching album fingerprints...",
-    "Running similarity matching...",
-    "Filtering duplicate entries...",
-    "Verifying source authenticity...",
-    "Compiling final results..."
-  ];
-
-  // Total delay: ~20 seconds
-  const AI_TOTAL_MS = 20000;
-
-  async function doSearch() {
-    const q = inp.value.trim();
-    if (!q) return;
-
-    const ql = q.toLowerCase();
-    const injectFake = ql.includes("sad") || ql.includes("$ad") || ql.includes("boyz") || ql.includes("junior") || ql.includes("4 life");
-    const injectBoveda = ql.includes("boveda") || ql.includes("bóveda") || ql.includes("natanael") || ql.includes("cano") || ql.includes("la boveda");
-
-    // Start real fetch immediately in background
-    let fetchPromise;
-    try {
-      fetchPromise = fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=16`);
-    } catch(e) { fetchPromise = Promise.reject(e); }
-
-    // Render AI loader
-    resultsEl.innerHTML = `
-      <div class="n3-section-label">Results</div>
-      <div class="n3-ai-loader">
-        <div class="n3-ai-loader-label">
-          N3XT AI — Processing
-          <span class="n3-ai-dots">
-            <span class="n3-ai-dot"></span>
-            <span class="n3-ai-dot"></span>
-            <span class="n3-ai-dot"></span>
-          </span>
+    if(isSingle){
+      // Single UI — centered, prominent, no download button
+      const preview=tracks[0]?.previewUrl||"";
+      const sn=(tracks[0]?.trackName||albumName).replace(/'/g,"\\'");
+      const sa=artistName.replace(/'/g,"\\'");
+      const bigPlay=preview
+        ?`<button class="play-btn" style="width:52px;height:52px;font-size:14px;border-width:2px" onclick="playPreview(this,'${preview}','${sn}','${sa}')">▶</button>`
+        :`<button class="play-btn" style="width:52px;height:52px;font-size:14px;border-width:2px;opacity:.25" disabled>▶</button>`;
+      document.getElementById("viewer").innerHTML=`
+        <img class="viewer-cover" src="${esc(cover)}" alt="" loading="lazy" style="border-radius:50%;max-width:160px">
+        <div class="single-banner">
+          <div class="single-banner-icon">🎵</div>
+          <div class="single-banner-info">
+            <div class="single-banner-title">Single</div>
+            <div class="single-banner-sub">This is a standalone single release</div>
+          </div>
         </div>
-        <div class="n3-ai-bar-wrap"><div class="n3-ai-bar" id="n3-ai-bar"></div></div>
-        <div class="n3-ai-steps" id="n3-ai-steps"></div>
-      </div>`;
-
-    viewerEl.innerHTML = `<div class="n3-viewer-empty"><div class="n3-empty-title">Select a result.</div><div class="n3-empty-sub">Full tracklist and metadata<br>will appear here.</div></div>`;
-
-    const bar = document.getElementById("n3-ai-bar");
-    const stepsEl = document.getElementById("n3-ai-steps");
-
-    // Animate progress bar over AI_TOTAL_MS
-    const barStart = performance.now();
-    let barFrame;
-    function animBar() {
-      const pct = Math.min((performance.now() - barStart) / AI_TOTAL_MS * 100, 95);
-      if (bar) bar.style.width = pct + "%";
-      if (pct < 95) barFrame = requestAnimationFrame(animBar);
-    }
-    barFrame = requestAnimationFrame(animBar);
-
-    // Show steps one by one
-    const stepInterval = AI_TOTAL_MS / AI_STEPS.length;
-    const stepEls = [];
-    AI_STEPS.forEach((text, i) => {
-      const div = document.createElement("div");
-      div.className = "n3-ai-step";
-      div.innerHTML = `<span class="n3-ai-step-dot"></span><span>${text}</span>`;
-      if (stepsEl) stepsEl.appendChild(div);
-      stepEls.push(div);
-      setTimeout(() => {
-        div.classList.add("visible");
-        if (i > 0 && stepEls[i-1]) stepEls[i-1].classList.add("done");
-        if (i === AI_STEPS.length - 1) div.classList.add("done");
-      }, i * stepInterval);
-    });
-
-    // Wait for fake delay AND real fetch, whichever is longer
-    const [, fetchResult] = await Promise.all([
-      new Promise(r => setTimeout(r, AI_TOTAL_MS)),
-      fetchPromise.then(r => r.json()).catch(() => null)
-    ]);
-
-    cancelAnimationFrame(barFrame);
-    if (bar) bar.style.transition = "width .4s ease";
-    if (bar) bar.style.width = "100%";
-    await new Promise(r => setTimeout(r, 420));
-
-    if (!fetchResult) {
-      resultsEl.innerHTML = `<div class="n3-section-label">Results</div><div class="n3-empty"><div class="n3-empty-title">Search failed.</div><div class="n3-empty-sub">Check your connection and try again.</div></div>`;
-      return;
-    }
-
-    let items = (fetchResult.results || []).filter((v, i, a) => v.collectionType !== 'Single' && a.findIndex(x => x.collectionId === v.collectionId) === i);
-    renderResults(items, injectFake, injectBoveda, q);
-  }
-
-  function renderResults(items, injectFake, injectBoveda, q) {
-    const total = items.length + (injectFake ? 1 : 0) + (injectBoveda ? 1 : 0);
-    let html = `<div class="n3-section-label">Results</div><div class="n3-status">${total} album${total !== 1 ? "s" : ""} — "${esc(q)}"</div>`;
-
-    if (!total) {
-      html += `<div class="n3-empty"><div class="n3-empty-title">No results.</div><div class="n3-empty-sub">Try a different name or artist.</div></div>`;
-      resultsEl.innerHTML = html;
-      return;
-    }
-
-    if (injectFake) {
-      html += `<div class="n3-result-item" onclick="openFake()">
-        <div style="width:52px;height:52px;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span style="font-size:10px;letter-spacing:.1em;color:#fff;text-transform:uppercase;">IG</span>
+        <div class="viewer-title">${esc(albumName)}</div>
+        <div class="viewer-artist">${esc(artistName)}</div>
+        <div class="meta-row">
+          <span class="mpill" style="background:#fc3c44;color:#fff">Apple Music</span>
+          <span class="mpill" style="background:#ff0000;color:#fff">YouTube Music</span>
+          <span class="mpill" style="background:#1db954;color:#fff">Spotify</span>
+          <span class="mpill">${yr(album.releaseDate)}</span>
+          <span class="mpill">${fmtMs(totalMs)}</span>
         </div>
-        <div class="n3-result-info">
-          <div class="n3-result-name">${esc(fakeAlbum.name)}</div>
-          <div class="n3-result-artist">${esc(fakeAlbum.artist)}</div>
-          <div class="n3-result-source">Instagram · Custom</div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 6px 20px;border-bottom:1px solid var(--border2)">
+          ${bigPlay}
+          <div>
+            <div style="font-size:14px;font-weight:600">${esc(tracks[0]?.trackName||albumName)}</div>
+            <div style="font-size:12px;color:var(--fg3);margin-top:2px">${esc(artistName)} · ${fmtMs(tracks[0]?.trackTimeMillis)}</div>
+          </div>
+        </div>`;
+    } else {
+      document.getElementById("viewer").innerHTML=`
+        <img class="viewer-cover" src="${esc(cover)}" alt="" loading="lazy">
+        <div class="viewer-title">${esc(albumName)}</div>
+        <div class="viewer-artist">${esc(artistName)}</div>
+        <div class="meta-row">
+          <span class="mpill" style="background:#fc3c44;color:#fff">Apple Music</span>
+          <span class="mpill" style="background:#ff0000;color:#fff">YouTube Music</span>
+          <span class="mpill" style="background:#1db954;color:#fff">Spotify</span>
+          <span class="mpill">${yr(album.releaseDate)}</span>
+          <span class="mpill">${tracks.length} tracks</span>
+          <span class="mpill">${fmtMs(totalMs)}</span>
         </div>
-      </div>`;
+        <button class="dl-btn" onclick="simulateDL('${esc(albumName)}',this)">⬇ Download Album</button>
+        <span class="tl-label">Tracklist</span>${rows}`;
     }
+  }catch{document.getElementById("viewer").innerHTML=`<div class="empty"><div class="empty-title">Failed to load.</div><div class="empty-sub">Try another album.</div></div>`;}
+}
 
-    if (injectBoveda) {
-      html += `<div class="n3-result-item" onclick="openBoveda()">
-        <img class="n3-result-thumb" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy" style="object-fit:cover;">
-        <div class="n3-result-info">
-          <div class="n3-result-name">${esc(bovedeAlbum.name)}</div>
-          <div class="n3-result-artist">${esc(bovedeAlbum.artist)}</div>
-          <div class="n3-result-source">Telegram · Custom</div>
-        </div>
-      </div>`;
-    }
+// ── Download: leaked ──────────────────────────────────────────────
+let currentLeakedAlbum=null;
+function handleLeakedDL(albumObj){
+  currentLeakedAlbum=albumObj; showModalStep("pw");
+  const inp=document.getElementById("pw-inp"); inp.value=""; document.getElementById("pw-err").textContent="";
+  document.getElementById("auth-modal").classList.add("on");
+  setTimeout(()=>inp.focus(),120);
+}
+function closeModal(){document.getElementById("auth-modal").classList.remove("on");setTimeout(()=>showModalStep("pw"),300);}
+function showModalStep(s){
+  document.getElementById("s-pw").style.display=s==="pw"?"":"none";
+  document.getElementById("s-val").style.display=s==="val"?"":"none";
+  document.getElementById("s-panel").style.display=s==="panel"?"":"none";
+}
+document.getElementById("pw-x").addEventListener("click",closeModal);
+document.getElementById("auth-modal").addEventListener("click",e=>{if(e.target===document.getElementById("auth-modal"))closeModal();});
+document.getElementById("pw-inp").addEventListener("keydown",e=>{if(e.key==="Enter")tryPW();});
+document.getElementById("pw-ok").addEventListener("click",tryPW);
 
-    items.forEach((album, idx) => {
-      const cover = (album.artworkUrl100 || "").replace("100x100", "300x300");
-      html += `<div class="n3-result-item" style="animation-delay:${idx * 0.04}s" onclick="openAlbum(${album.collectionId})">
-        <img class="n3-result-thumb" src="${esc(cover)}" alt="" loading="lazy">
-        <div class="n3-result-info">
-          <div class="n3-result-name">${esc(album.collectionName || "Unknown")}</div>
-          <div class="n3-result-artist">${esc(album.artistName || "—")}</div>
-          <div class="n3-result-source">Apple Music · ${esc(year(album.releaseDate))}</div>
-        </div>
-      </div>`;
-    });
-
-    resultsEl.innerHTML = html;
+const VAL_STEPS=["Connecting to authorization server...","Encrypting credentials...","Processing request...","Validating access token...","Checking personnel registry...","Access granted."];
+function tryPW(){
+  const inp=document.getElementById("pw-inp"), err=document.getElementById("pw-err");
+  const val=inp.value.trim(); if(!val){err.textContent="Password is required.";return;}
+  if(val!=="n3xtadmin"){
+    err.textContent="Incorrect password. Access denied.";
+    inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");inp.value="";
+    setTimeout(()=>inp.classList.remove("shake"),400);return;
   }
+  showModalStep("val");
+  const stepsEl=document.getElementById("val-steps"); stepsEl.innerHTML="";
+  const els=VAL_STEPS.map(text=>{const d=document.createElement("div");d.className="vs";d.innerHTML=`<span class="vs-dot"></span><span>${text}</span>`;stepsEl.appendChild(d);return d;});
+  els.forEach((el,i)=>setTimeout(()=>{el.classList.add("vis");if(i>0)els[i-1].classList.add("done");if(i===els.length-1){el.classList.add("done");setTimeout(openPanel,200);}},i*120+200));
+}
 
-  // ── Viewer: fake leaked album ─────────────────────────────────
-  const DIEZ_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/fileunknownlolcustom.wav";
-  const LAMOUR_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/L'AMOUR.wav";
-  let currentAudio = null;
-  let currentPlayBtn = null;
-  let lamourAttempts = 0;
+function openPanel(){
+  showModalStep("panel");
+  document.getElementById("prog").style.display="none";
+  document.getElementById("song-picker").style.display="none";
+  document.getElementById("p-song").disabled=false;
+  document.getElementById("p-album").disabled=false;
+  const sel=document.getElementById("song-sel"); sel.innerHTML="";
+  if(currentLeakedAlbum?.tracks) currentLeakedAlbum.tracks.forEach((t,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${i+1}. ${t.name}`;sel.appendChild(o);});
+  document.getElementById("panel-desc").textContent=currentLeakedAlbum?`"${currentLeakedAlbum.name}" — select your download option.`:"Select your download option.";
+}
 
-  // ── Now Playing bar ───────────────────────────────────────────
-  const npBar = document.getElementById("n3-now-playing");
-  const npLabel = document.getElementById("n3-np-label");
+function startDL(type){
+  if(type==="song"){document.getElementById("song-picker").style.display="";document.getElementById("prog").style.display="none";return;}
+  runProgress("album");
+}
+function confirmTrackDL(){document.getElementById("song-picker").style.display="none";runProgress("song");}
 
-  function showNowPlaying(trackName, artistName) {
-    npLabel.textContent = (artistName ? artistName + " — " : "") + trackName;
-    npBar.style.display = "flex";
-    // dark mode fix
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      npBar.style.background = "#000";
-      npBar.style.borderTopColor = "#fff";
-    }
-  }
-  function hideNowPlaying() {
-    npBar.style.display = "none";
-    npLabel.textContent = "";
-  }
-  function stopCurrentAudio() {
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-    if (currentPlayBtn) { currentPlayBtn.innerHTML = "▶"; currentPlayBtn.classList.remove("playing"); currentPlayBtn = null; }
-    hideNowPlaying();
-  }
-  window.stopCurrentAudio = stopCurrentAudio;
+const S_STEPS=["Locating track in secure vault...","Decrypting audio file...","Connecting to distribution node...","Fetching audio stream...","Verifying file integrity...","Preparing transfer...","Finalizing..."];
+const A_STEPS=["Authenticating session...","Locating album in secure vault...","Decrypting audio archive...","Connecting to distribution node...","Fetching tracks 1 of 17...","Fetching tracks 8 of 17...","Fetching tracks 17 of 17...","Compressing archive...","Verifying checksums...","Packaging bundle...","Transfer ready..."];
 
-  function playTrack(btn, trackName, trackIdx) {
-    // Stop any existing playback
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
-    if (currentPlayBtn && currentPlayBtn !== btn) {
-      currentPlayBtn.innerHTML = "▶";
-      currentPlayBtn.classList.remove("playing");
-    }
-
-    // If same button clicked again while playing, just stop
-    if (btn.classList.contains("playing")) {
-      btn.innerHTML = "▶";
-      btn.classList.remove("playing");
-      currentPlayBtn = null;
-      hideNowPlaying();
-      return;
-    }
-
-    // Track index 8 = "Diez De Copas" (0-based in fakeAlbum.tracks)
-    if (trackIdx === 8) {
-      btn.innerHTML = "■";
-      btn.classList.add("playing");
-      currentPlayBtn = btn;
-      showNowPlaying(trackName, "Junior H");
-      showNotif("Preview Only", `"${trackName}" — this is a preview. Full song requires authorization.`, "err");
-
-      const audio = new Audio(DIEZ_URL);
-      currentAudio = audio;
-      audio.play().catch(() => {
-        showNotif("Playback Error", `Could not load "${trackName}". Check your connection.`, "err");
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        currentAudio = null;
-        hideNowPlaying();
-      });
-
-      // After 17 seconds, stop and show error
-      const errTimer = setTimeout(() => {
-        audio.pause();
-        currentAudio = null;
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        showNotif("Error Loading Track", `"${trackName}" — error loading rest of the song. File may be corrupted or incomplete.`, "err");
-        hideNowPlaying();
-      }, 17000);
-
-      audio.addEventListener("ended", () => {
-        clearTimeout(errTimer);
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        currentAudio = null;
-        hideNowPlaying();
-      }, { once: true });
-
-    // Track index 12 = "L'Amour" (0-based in fakeAlbum.tracks)
-    } else if (trackIdx === 12) {
-      lamourAttempts++;
-
-      // First attempt — fail immediately
-      if (lamourAttempts === 1) {
-        showNotif("Playback Failed", `"${trackName}" — audio file not found on server.`, "err");
-        return;
+function runProgress(type){
+  const isSong=type==="song";
+  const totalMs=currentLeakedAlbum?.dlTime||10000;
+  const steps=isSong?S_STEPS:A_STEPS;
+  const albumName=currentLeakedAlbum?.name||"Album";
+  const songName=isSong?currentLeakedAlbum?.tracks[document.getElementById("song-sel").value]?.name||"Track":null;
+  document.getElementById("p-song").disabled=true; document.getElementById("p-album").disabled=true;
+  const progEl=document.getElementById("prog"), lbl=document.getElementById("prog-lbl"), bar=document.getElementById("prog-bar"), stepsEl=document.getElementById("prog-steps");
+  progEl.style.display=""; lbl.textContent=isSong?"Downloading track...":"Downloading full album..."; bar.style.width="0%"; bar.style.transition=""; stepsEl.innerHTML="";
+  const els=steps.map(text=>{const d=document.createElement("div");d.className="pstep";d.innerHTML=`<span>›</span><span>${text}</span>`;stepsEl.appendChild(d);return d;});
+  const start=performance.now(); let raf;
+  function anim(){const p=Math.min((performance.now()-start)/totalMs*100,95);bar.style.width=p+"%";if(p<95)raf=requestAnimationFrame(anim);}
+  raf=requestAnimationFrame(anim);
+  const si=(totalMs*.85)/steps.length; els.forEach((el,i)=>setTimeout(()=>{el.classList.add("vis");if(i>0)els[i-1].classList.add("done");},i*si));
+  setTimeout(()=>{
+    cancelAnimationFrame(raf); bar.style.transition="width .3s ease"; bar.style.width="100%";
+    if(els.length)els[els.length-1].classList.add("done");
+    setTimeout(()=>{
+      closeModal();
+      if(!isSong){
+        const mob=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const ZIP="https://github.com/Rainfun/Pulse/raw/refs/heads/main/n3xt.github.io%20$AD%20BOYZ%204%20LIFE%20III.zip";
+        showNotif("Download Complete",`"${albumName}" — downloaded successfully.`,"ok");
+        if(mob){window.location.href=ZIP;}
+        else{fetch(ZIP).then(r=>r.blob()).then(blob=>{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="$AD BOYZ 4 LIFE III.zip";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);}).catch(()=>window.open(ZIP,"_blank"));}
+      } else {
+        showNotif("Download Failed",`"${songName}" — transfer error. File could not be retrieved.`,"err");
       }
+    },500);
+  },totalMs);
+}
 
-      // Second attempt and beyond — play but show error after ~17s
-      btn.innerHTML = "■";
-      btn.classList.add("playing");
-      currentPlayBtn = btn;
-      showNowPlaying(trackName, "Junior H");
-      showNotif("Preview Only", `"${trackName}" — this is a preview. Full song requires authorization.`, "err");
+function simulateDL(albumName,btn){
+  btn.textContent="Downloading..."; btn.classList.add("loading");
+  setTimeout(()=>{btn.textContent="⬇ Download Album";btn.classList.remove("loading");showNotif("Download Failed",`"${albumName}" could not be downloaded. Please try again.`,"err");},2200+Math.random()*800);
+}
 
-      const audio = new Audio(LAMOUR_URL);
-      currentAudio = audio;
-      audio.play().catch(() => {
-        showNotif("Playback Error", `Could not load "${trackName}". Check your connection.`, "err");
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        currentAudio = null;
-        hideNowPlaying();
-      });
+// ── Search ────────────────────────────────────────────────────────
+const si=document.getElementById("si"), sbtn=document.getElementById("sb");
+const resultsEl=document.getElementById("results");
+sbtn.addEventListener("click",doSearch);
+si.addEventListener("keydown",e=>{if(e.key==="Enter")doSearch();});
 
-      // After 17 seconds, stop and show error
-      const errTimer = setTimeout(() => {
-        audio.pause();
-        currentAudio = null;
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        showNotif("Error Loading Track", `"${trackName}" — error loading rest of the song. File may be corrupted or incomplete.`, "err");
-        hideNowPlaying();
-      }, 17000);
+const AI_STEPS=["Initializing neural search engine...","Parsing query semantics...","Scanning music databases...","Cross-referencing release metadata...","Analyzing catalog index...","Fetching album fingerprints...","Running similarity matching...","Filtering duplicate entries...","Verifying source authenticity...","Compiling final results..."];
+const AI_MS=20000;
 
-      audio.addEventListener("ended", () => {
-        clearTimeout(errTimer);
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        currentAudio = null;
-        hideNowPlaying();
-      }, { once: true });
+async function doSearch(){
+  const q=si.value.trim(); if(!q)return;
+  const ql=q.toLowerCase();
+  const fake=ql.includes("sad")||ql.includes("$ad")||ql.includes("boyz")||ql.includes("junior")||ql.includes("4 life");
+  const boveda=ql.includes("boveda")||ql.includes("bóveda")||ql.includes("natanael")||ql.includes("cano")||ql.includes("la boveda");
+  const levitico=ql.includes("levitico")||ql.includes("levítico")||ql.includes("peso pluma")||ql.includes("peso");
+  let fp; try{fp=fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=16`);}catch(e){fp=Promise.reject(e);}
+  resultsEl.innerHTML=`<div class="sec-label">Results</div><div class="ai-loader"><div class="ai-lbl">N3XT AI — Processing<span class="ai-dots"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></span></div><div class="ai-bar-wrap"><div class="ai-bar" id="ai-bar"></div></div><div class="ai-steps" id="ai-steps"></div></div>`;
+  document.getElementById("viewer").innerHTML=`<div class="empty" style="padding:56px 0"><div class="empty-title">Select a result.</div><div class="empty-sub">Tracklist and metadata<br>will appear here.</div></div>`;
+  const bar=document.getElementById("ai-bar"), stepsEl=document.getElementById("ai-steps");
+  const bs=performance.now(); let raf;
+  function anim(){const p=Math.min((performance.now()-bs)/AI_MS*100,95);if(bar)bar.style.width=p+"%";if(p<95)raf=requestAnimationFrame(anim);}
+  raf=requestAnimationFrame(anim);
+  const si2=AI_MS/AI_STEPS.length; const sels=[];
+  AI_STEPS.forEach((text,i)=>{const d=document.createElement("div");d.className="ai-step";d.innerHTML=`<span class="ai-step-dot"></span><span>${text}</span>`;if(stepsEl)stepsEl.appendChild(d);sels.push(d);setTimeout(()=>{d.classList.add("vis");if(i>0&&sels[i-1])sels[i-1].classList.add("done");if(i===AI_STEPS.length-1)d.classList.add("done");},i*si2);});
+  const[,fr]=await Promise.all([new Promise(r=>setTimeout(r,AI_MS)),fp.then(r=>r.json()).catch(()=>null)]);
+  cancelAnimationFrame(raf);if(bar){bar.style.transition="width .4s ease";bar.style.width="100%";}
+  await new Promise(r=>setTimeout(r,400));
+  if(!fr){resultsEl.innerHTML=`<div class="sec-label">Results</div><div class="empty"><div class="empty-title">Search failed.</div><div class="empty-sub">Check your connection and try again.</div></div>`;return;}
+  let items=(fr.results||[]).filter((v,i,a)=>a.findIndex(x=>x.collectionId===v.collectionId)===i);
+  lastResultsCache=[items,fake,boveda,levitico,q];
+  renderResults(items,fake,boveda,levitico,q);
+}
 
-    } else {
-      // All other tracks — fail immediately with notification
-      showNotif("Playback Failed", `"${trackName}" — audio file not found on server.`, "err");
-    }
-  }
+function renderResults(items,injectFake,injectBoveda,injectLevitico,q){
+  const f=activeFilter;
+  const showFake=injectFake&&(f==="all"||f==="Instagram");
+  const showBoveda=injectBoveda&&(f==="all"||f==="Telegram");
+  const showLevitico=injectLevitico&&(f==="all"||f==="Telegram");
+  const showApple=f==="all"||f==="Apple Music"||f==="YouTube Music"||f==="Spotify";
+  const filtered=showApple?items:[];
+  const total=filtered.length+(showFake?1:0)+(showBoveda?1:0)+(showLevitico?1:0);
+  let html=`<div class="sec-label">Results</div><div class="status-line">${total} result${total!==1?"s":""}${f!=="all"?" · "+esc(f):""} — "${esc(q)}"</div>`;
+  if(!total){html+=`<div class="empty"><div class="empty-title">No results.</div><div class="empty-sub">Try a different search or filter.</div></div>`;resultsEl.innerHTML=html;return;}
+  if(showFake) html+=`<div class="result-item" onclick="openFake()"><div class="result-thumb-ph"><span>IG</span></div><div class="result-info"><div class="result-name">${esc(fakeAlbum.name)}</div><div class="result-artist">${esc(fakeAlbum.artist)}</div><div class="result-badges"><span class="badge b-ig">Instagram</span></div></div></div>`;
+  if(showBoveda) html+=`<div class="result-item" onclick="openBoveda()"><img class="result-thumb" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy"><div class="result-info"><div class="result-name">${esc(bovedeAlbum.name)}</div><div class="result-artist">${esc(bovedeAlbum.artist)}</div><div class="result-badges"><span class="badge b-tg">Telegram</span></div></div></div>`;
+  if(showLevitico) html+=`<div class="result-item" onclick="openLevitico()"><div class="result-thumb-ph"><span>N3XT</span></div><div class="result-info"><div class="result-name">${esc(leviticoAlbum.name)}</div><div class="result-artist">${esc(leviticoAlbum.artist)}</div><div class="result-badges"><span class="badge b-tg">Telegram</span></div></div></div>`;
+  // Apple Music results — show with all 3 platform badges, deduplicate
+  const seen=new Set();
+  filtered.forEach((album,idx)=>{
+    if(seen.has(album.collectionId))return; seen.add(album.collectionId);
+    const cover=(album.artworkUrl100||"").replace("100x100","300x300");
+    const isSingle=album.collectionType==="Single"||album.trackCount===1;
+    const singleClass=isSingle?" single-item":"";
+    const singleBadge=isSingle?`<span class="badge" style="background:linear-gradient(135deg,#fa2d48,#ff6b35);color:#fff">Single</span>`:"";
+    html+=`<div class="result-item${singleClass}" style="animation-delay:${idx*.03}s" onclick="openAlbum(${album.collectionId})"><img class="result-thumb" src="${esc(cover)}" alt="" loading="lazy"><div class="result-info"><div class="result-name">${esc(album.collectionName||"Unknown")}</div><div class="result-artist">${esc(album.artistName||"—")}</div><div class="result-badges">${singleBadge}<span class="badge b-am">Apple Music</span><span class="badge b-yt">YouTube Music</span><span class="badge b-sp">Spotify</span></div></div></div>`;
+  });
+  resultsEl.innerHTML=html;
+}
 
-  function openFake() {
-    document.title = "N3XT";
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-
-    let rows = fakeAlbum.tracks.map((t, i) =>
-      `<div class="n3-track" style="animation-delay:${i * 0.025}s">
-        <button class="n3-play-btn" onclick="playTrack(this,'${t.name.replace(/'/g,"\\'")}',${i})" title="Play ${t.name}">▶</button>
-        <span class="n3-track-no">${i + 1}</span>
-        <div class="n3-track-info">
-          <div class="n3-track-name">${esc(t.name)}</div>
-          <div class="n3-track-artist">${esc(t.artist)}</div>
-        </div>
-        <span class="n3-track-dur">${esc(t.length)}</span>
-      </div>`
-    ).join("");
-
-    viewerEl.innerHTML = `
-      <div style="width:100%;aspect-ratio:1;max-width:260px;background:#111;display:flex;align-items:center;justify-content:center;margin-bottom:28px;animation:n3fadeIn .5s ease both;transition:transform .3s,box-shadow .3s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 8px 30px rgba(0,0,0,.25)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <span style="font-size:11px;letter-spacing:.2em;color:#666;text-transform:uppercase;">N3XT</span>
-      </div>
-      <div class="n3-viewer-title">${esc(fakeAlbum.name)}</div>
-      <div class="n3-viewer-artist">${esc(fakeAlbum.artist)}</div>
-      <div class="n3-meta-row">
-        <div class="n3-meta-pill">Instagram</div>
-        <div class="n3-meta-pill">${esc(fakeAlbum.year)}</div>
-        <div class="n3-meta-pill">${fakeAlbum.tracks.length} tracks</div>
-      </div>
-      <button class="n3-dl-btn" id="n3-dl-fake" onclick="handleLeakedDownload(this, fakeAlbum)">Download Album</button>
-      <span class="n3-viewer-meta-label" style="display:block;margin-top:20px;">Tracklist</span>
-      ${rows}
-    `;
-  }
-
-  function handleLeakedDownload(btnEl, albumObj) {
-    openModal(albumObj);
-  }
-
-  // ── Viewer: LA BOVEDA leaked album ────────────────────────────
-  function openBoveda() {
-    document.title = "N3XT";
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-
-    let rows = bovedeAlbum.tracks.map((t, i) =>
-      `<div class="n3-track" style="animation-delay:${i * 0.025}s">
-        <button class="n3-play-btn" onclick="playBoveadaTrack(this,'${t.name.replace(/'/g,"\\'")}',${i})">▶</button>
-        <span class="n3-track-no">${i + 1}</span>
-        <div class="n3-track-info">
-          <div class="n3-track-name">${esc(t.name)}</div>
-          <div class="n3-track-artist">${esc(t.artist)}</div>
-        </div>
-        <span class="n3-track-dur">${esc(t.length)}</span>
-      </div>`
-    ).join("");
-
-    viewerEl.innerHTML = `
-      <img class="n3-viewer-cover" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy">
-      <div class="n3-viewer-title">${esc(bovedeAlbum.name)}</div>
-      <div class="n3-viewer-artist">${esc(bovedeAlbum.artist)}</div>
-      <div class="n3-meta-row">
-        <div class="n3-meta-pill">Telegram</div>
-        <div class="n3-meta-pill">${esc(bovedeAlbum.year)}</div>
-        <div class="n3-meta-pill">${bovedeAlbum.tracks.length} tracks</div>
-      </div>
-      <button class="n3-dl-btn" onclick="handleLeakedDownload(this, bovedeAlbum)">Download Album</button>
-      <span class="n3-viewer-meta-label" style="display:block;margin-top:20px;">Tracklist</span>
-      ${rows}
-    `;
-  }
-
-  const AETERNUM_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/xczxczxczxc.wav";
-
-  function playBoveadaTrack(btn, trackName, trackIdx) {
-    // Stop any existing playback
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
-    if (currentPlayBtn && currentPlayBtn !== btn) {
-      currentPlayBtn.innerHTML = "▶";
-      currentPlayBtn.classList.remove("playing");
-    }
-
-    // If same button clicked again while playing, just stop
-    if (btn.classList.contains("playing")) {
-      btn.innerHTML = "▶";
-      btn.classList.remove("playing");
-      currentPlayBtn = null;
-      hideNowPlaying();
-      return;
-    }
-
-    // Track index 1 = "AETERNUM"
-    if (trackIdx === 1) {
-      btn.innerHTML = "■";
-      btn.classList.add("playing");
-      currentPlayBtn = btn;
-      showNowPlaying(trackName, "Natanael Cano");
-      showNotif("Preview Only", `"${trackName}" — this is a preview. Full song requires authorization.`, "err");
-
-      const audio = new Audio(AETERNUM_URL);
-      currentAudio = audio;
-      audio.play().catch(() => {
-        showNotif("Playback Error", `Could not load "${trackName}". Check your connection.`, "err");
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        currentAudio = null;
-      });
-
-      // After 3 seconds, stop and show error
-      const errTimer = setTimeout(() => {
-        audio.pause();
-        currentAudio = null;
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        showNotif("Error Loading Track", `"${trackName}" — error loading rest of the song. File may be corrupted or incomplete.`, "err");
-        hideNowPlaying();
-      }, 3000);
-
-      audio.addEventListener("ended", () => {
-        clearTimeout(errTimer);
-        btn.innerHTML = "▶";
-        btn.classList.remove("playing");
-        currentPlayBtn = null;
-        currentAudio = null;
-        hideNowPlaying();
-      }, { once: true });
-
-    } else {
-      showNotif("Playback Failed", `"${trackName}" — audio file not found on server.`, "err");
-    }
-  }
-
-  // ── Viewer: real Apple Music album ────────────────────────────
-  async function openAlbum(id) {
-    document.title = "N3XT";
-    viewerEl.innerHTML = `<div class="n3-spinner"></div>`;
-
-    try {
-      const res = await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=song`);
-      const data = await res.json();
-      const all = data.results || [];
-      const album = all[0];
-      const tracks = all.slice(1);
-      if (!album) throw new Error();
-
-      const cover = (album.artworkUrl100 || "").replace("100x100", "600x600");
-      const totalMs = tracks.reduce((a, t) => a + (t.trackTimeMillis || 0), 0);
-      const albumName = album.collectionName || "Unknown";
-
-      let rows = tracks.length
-        ? tracks.map((t, i) => {
-          const preview = t.previewUrl || "";
-          const safePreview = preview.replace(/'/g, "\'");
-          const safeName = (t.trackName || "Unknown").replace(/'/g, "\'");
-          const playBtn = preview
-            ? `<button class="n3-play-btn" onclick="playPreview(this,'${safePreview}','${safeName}')" title="Play 30s preview">▶</button>`
-            : `<button class="n3-play-btn" style="opacity:.3;cursor:default;" title="No preview available" disabled>▶</button>`;
-          return `<div class="n3-track" style="animation-delay:${i * 0.025}s">
-            ${playBtn}
-            <span class="n3-track-no">${i + 1}</span>
-            <div class="n3-track-info">
-              <div class="n3-track-name">${esc(t.trackName || "Unknown")}</div>
-              <div class="n3-track-artist">${esc(t.artistName || album.artistName || "—")}</div>
-            </div>
-            <span class="n3-track-dur">${fmtMs(t.trackTimeMillis)}</span>
-          </div>`;
-        }).join("")
-        : `<div class="n3-empty-sub" style="padding:20px 0;">No tracks returned for this album.</div>`;
-
-      viewerEl.innerHTML = `
-        <img class="n3-viewer-cover" src="${esc(cover)}" alt="" loading="lazy">
-        <div class="n3-viewer-title">${esc(albumName)}</div>
-        <div class="n3-viewer-artist">${esc(album.artistName || "—")}</div>
-        <div class="n3-meta-row">
-          <div class="n3-meta-pill">Apple Music</div>
-          <div class="n3-meta-pill">${esc(year(album.releaseDate))}</div>
-          <div class="n3-meta-pill">${tracks.length} tracks</div>
-          <div class="n3-meta-pill">${fmtMs(totalMs)}</div>
-        </div>
-        <button class="n3-dl-btn" id="n3-dl-real" onclick="handleRealDownload(this, '${esc(albumName)}')">Download Album</button>
-        <span class="n3-viewer-meta-label" style="display:block;margin-top:20px;">Tracklist</span>
-        ${rows}
-      `;
-    } catch {
-      viewerEl.innerHTML = `<div class="n3-viewer-empty"><div class="n3-empty-title">Failed to load.</div><div class="n3-empty-sub">Try another album.</div></div>`;
-    }
-  }
-
-  function handleRealDownload(btnEl, albumName) {
-    simulateDownload(albumName, btnEl);
-  }
-
-  // ── Apple Music preview playback ─────────────────────────────
-  function playPreview(btn, previewUrl, trackName) {
-    // Stop any existing playback
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
-    if (currentPlayBtn && currentPlayBtn !== btn) {
-      currentPlayBtn.innerHTML = "▶";
-      currentPlayBtn.classList.remove("playing");
-    }
-
-    // Toggle off if already playing
-    if (btn.classList.contains("playing")) {
-      btn.innerHTML = "▶";
-      btn.classList.remove("playing");
-      currentPlayBtn = null;
-      hideNowPlaying();
-      return;
-    }
-
-    btn.innerHTML = "■";
-    btn.classList.add("playing");
-    currentPlayBtn = btn;
-    showNowPlaying(trackName, "");
-
-    const audio = new Audio(previewUrl);
-    currentAudio = audio;
-    audio.play().catch(() => {
-      showNotif("Playback Error", `Could not load preview for "${trackName}".`, "err");
-      btn.innerHTML = "▶";
-      btn.classList.remove("playing");
-      currentPlayBtn = null;
-      currentAudio = null;
-      hideNowPlaying();
-    });
-
-    audio.addEventListener("ended", () => {
-      btn.innerHTML = "▶";
-      btn.classList.remove("playing");
-      currentPlayBtn = null;
-      currentAudio = null;
-      hideNowPlaying();
-    }, { once: true });
-  }
-
-  window.playPreview = playPreview;
-  window.openFake = openFake;
-  window.openBoveda = openBoveda;
-  window.openAlbum = openAlbum;
-  window.handleLeakedDownload = handleLeakedDownload;
-  window.handleRealDownload = handleRealDownload;
-  window.startPanelDownload = startPanelDownload;
-  window.confirmSongDownload = confirmSongDownload;
-  window.closeModal = closeModal;
-  window.playTrack = playTrack;
-  window.playBoveadaTrack = playBoveadaTrack;
-  window.startPanelDownload = startPanelDownload;
-  window.confirmSongDownload = confirmSongDownload;
-  window.closeModal = closeModal;
-  window.playTrack = playTrack;
-  window.playBoveadaTrack = playBoveadaTrack;
+// ── Globals ───────────────────────────────────────────────────────
+window.openFake=openFake; window.openBoveda=openBoveda; window.openAlbum=openAlbum; window.openLevitico=openLevitico;
+window.closeChangelog=closeChangelog;
+window.handleLeakedDL=handleLeakedDL; window.simulateDL=simulateDL;
+window.startDL=startDL; window.confirmTrackDL=confirmTrackDL; window.closeModal=closeModal;
+window.playTrack=playTrack; window.playBoveadaTrack=playBoveadaTrack; window.playPreview=playPreview;
+window.stopCurrentAudio=stopCurrentAudio; window.openTOS=openTOS; window.closeTOS=closeTOS;
 </script>
 </body>
 </html>
