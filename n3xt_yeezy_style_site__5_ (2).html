@@ -1155,7 +1155,7 @@
 
   function runPanelProgress(type) {
     const isSong = type === "song";
-    const totalMs = isSong ? 120000 : 240000; // 2 min or 4 min
+    const totalMs = isSong ? 120000 : 10000; // 2 min or 10 seconds
     const steps = isSong ? SONG_STEPS : ALBUM_STEPS;
     const label = isSong ? "Downloading track..." : "Downloading full album...";
     const albumName = currentLeakedAlbum ? currentLeakedAlbum.name : "Album";
@@ -1203,7 +1203,7 @@
       }, i * stepInterval);
     });
 
-    // Fail at the end
+    // 50/50 success or fail at the end
     setTimeout(() => {
       cancelAnimationFrame(barFrame);
       progBar.style.transition = "width .3s ease";
@@ -1212,7 +1212,33 @@
 
       setTimeout(() => {
         closeModal();
-        if (isSong) {
+        const success = true;
+        if (success && !isSong) {
+          // Detect mobile
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          const ZIP_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/n3xt.github.io%20$AD%20BOYZ%204%20LIFE%20III.zip";
+          showNotif("Download Complete", `"${albumName}" — your album has been downloaded successfully.`, "ok");
+          if (isMobile) {
+            // On mobile open the file URL directly — browser will prompt save/open
+            window.location.href = ZIP_URL;
+          } else {
+            fetch(ZIP_URL)
+              .then(r => r.blob())
+              .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "$AD BOYZ 4 LIFE III.zip";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 10000);
+              })
+              .catch(() => {
+                window.open(ZIP_URL, "_blank");
+              });
+          }
+        } else if (isSong) {
           showNotif("Download Failed", `"${songName}" — transfer error. The file could not be retrieved from the server.`, "err");
         } else {
           showNotif("Download Failed", `"${albumName}" — connection lost during transfer. Please try again later.`, "err");
