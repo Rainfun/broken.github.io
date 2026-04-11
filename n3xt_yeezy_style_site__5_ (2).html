@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N3XT</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAADklEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==">
+<style>
+  @keyframes n3spin { to { transform: rotate(360deg); } }
+  @keyframes n3fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes n3slideIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes n3heroIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes n3pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+  @keyframes n3modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  @keyframes n3overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes n3shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+  @keyframes n3notifIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes n3notifOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
+  @keyframes n3dlPulse { 0%,100% { letter-spacing: .14em; } 50% { letter-spacing: .22em; } }
+  @keyframes n3blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  @keyframes n3barGrow { 0% { width: 0%; } 100% { width: 100%; } }
+  @keyframes n3dotFade { 0%,80%,100% { opacity: 0; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+
+  #n3xt-app {
+    min-height: 100vh;
+    background: #fff;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    animation: n3fadeIn .5s ease both;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #n3xt-app { background: #000; color: #fff; }
+    .n3-input { background: #000; color: #fff; border-color: #fff; }
+    .n3-input::placeholder { color: #888; }
+    .n3-nav { border-bottom-color: #fff; background: #000; }
+    .n3-result-item { border-bottom-color: #222; }
+    .n3-result-item:hover { background: #111; }
+    .n3-viewer { border-left-color: #333; }
+    .n3-track { border-bottom-color: #222; }
+    .n3-track:hover { background: #111; }
+    .n3-meta-pill { border-color: #fff; color: #fff; }
+    .n3-back { color: #fff; border-color: #fff; }
+    .n3-btn { background: #fff; color: #000; border-color: #fff; }
+    .n3-section-label { color: #888; }
+    .n3-result-artist { color: #888; }
+    .n3-track-dur { color: #888; }
+    .n3-track-artist { color: #888; }
+    .n3-viewer-artist { color: #888; }
+    .n3-viewer-meta-label { color: #888; }
+    .n3-status { color: #888; }
+    .n3-empty-sub { color: #888; }
+    .n3-result-source { color: #888; }
+    .n3-results { border-right-color: #333; }
+    .n3-section-label { border-bottom-color: #222; }
+    .n3-modal-box { background: #000; color: #fff; border-color: #333; }
+    .n3-modal-input { background: #111; color: #fff; border-color: #444; }
+    .n3-modal-input::placeholder { color: #555; }
+    .n3-dl-btn { border-color: #fff; color: #fff; background: rgba(255,255,255,0.08); }
+    .n3-dl-btn:hover { background: #fff; color: #000; }
+    .n3-notif { background: #111; color: #fff; border-color: #333; }
+    /* Dark mode: make meta pills and modal visible */
+    .n3-meta-pill { background: rgba(255,255,255,0.08); }
+  }
+
+  /* AI search loader */
+  .n3-ai-loader {
+    padding: 28px 40px 20px;
+    animation: n3fadeIn .3s ease both;
+  }
+  .n3-ai-loader-label {
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .n3-ai-dots {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .n3-ai-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #888;
+    animation: n3dotFade 1.2s ease infinite;
+  }
+  .n3-ai-dot:nth-child(2) { animation-delay: .2s; }
+  .n3-ai-dot:nth-child(3) { animation-delay: .4s; }
+
+  .n3-ai-bar-wrap {
+    width: 100%;
+    height: 1px;
+    background: #eee;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  @media (prefers-color-scheme: dark) { .n3-ai-bar-wrap { background: #222; } }
+  .n3-ai-bar {
+    height: 100%;
+    background: #000;
+    width: 0%;
+  }
+  @media (prefers-color-scheme: dark) { .n3-ai-bar { background: #fff; } }
+
+  .n3-ai-steps {
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: #bbb;
+    line-height: 2;
+    min-height: 88px;
+  }
+  .n3-ai-step {
+    opacity: 0;
+    transition: opacity .4s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .n3-ai-step.visible { opacity: 1; }
+  .n3-ai-step-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #ccc;
+    flex-shrink: 0;
+    transition: background .3s;
+  }
+  .n3-ai-step.done .n3-ai-step-dot { background: #000; }
+  @media (prefers-color-scheme: dark) { .n3-ai-step.done .n3-ai-step-dot { background: #fff; } }
+
+  .n3-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    border-bottom: 1px solid #000;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+  }
+
+  .n3-wordmark {
+    font-size: 13px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-weight: 400;
+    animation: n3heroIn .6s ease both;
+  }
+
+  .n3-nav-right {
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #888;
+    animation: n3heroIn .6s .1s ease both;
+  }
+
+  .n3-hero {
+    padding: 80px 40px 60px;
+    border-bottom: 1px solid #000;
+    flex-shrink: 0;
+    animation: n3heroIn .7s .05s ease both;
+  }
+  @media (prefers-color-scheme: dark) {
+    .n3-hero { border-bottom-color: #333; }
+  }
+
+  .n3-hero-title {
+    font-size: clamp(60px, 10vw, 120px);
+    font-weight: 400;
+    letter-spacing: -.04em;
+    line-height: .9;
+    margin-bottom: 40px;
+    animation: n3heroIn .8s .08s ease both;
+  }
+
+  .n3-search-row {
+    display: flex;
+    gap: 0;
+    max-width: 600px;
+    animation: n3fadeIn .8s .2s ease both;
+  }
+
+  .n3-input {
+    flex: 1;
+    height: 48px;
+    border: 1px solid #000;
+    border-right: none;
+    background: #fff;
+    color: #000;
+    padding: 0 18px;
+    font-size: 13px;
+    letter-spacing: .04em;
+    font-family: inherit;
+    outline: none;
+    border-radius: 0;
+    transition: border-color .2s;
+  }
+  .n3-input:focus { border-color: #555; }
+
+  .n3-btn {
+    height: 48px;
+    padding: 0 24px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .15s, transform .12s;
+    white-space: nowrap;
+  }
+  .n3-btn:hover { opacity: .75; }
+  .n3-btn:active { transform: scale(.97); }
+
+  .n3-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .n3-results {
+    border-right: 1px solid #000;
+    overflow-y: auto;
+  }
+
+  .n3-section-label {
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 20px 40px 12px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .n3-status {
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: #888;
+    padding: 10px 40px 16px;
+    animation: n3fadeIn .3s ease both;
+  }
+
+  .n3-result-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 40px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background .12s, transform .12s;
+    animation: n3slideIn .35s ease both;
+  }
+  .n3-result-item:hover { background: #f7f7f7; transform: translateX(3px); }
+  .n3-result-item:active { transform: scale(.99); }
+
+  .n3-result-thumb {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #eee;
+    display: block;
+    transition: transform .2s;
+  }
+  .n3-result-item:hover .n3-result-thumb { transform: scale(1.05); }
+
+  .n3-result-info { min-width: 0; }
+  .n3-result-name {
+    font-size: 13px;
+    letter-spacing: .02em;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .n3-result-artist {
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: #888;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .n3-result-source {
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-top: 4px;
+  }
+
+  .n3-empty {
+    padding: 80px 40px;
+    text-align: left;
+    animation: n3fadeIn .4s ease both;
+  }
+  .n3-empty-title {
+    font-size: 28px;
+    letter-spacing: -.03em;
+    font-weight: 400;
+    margin-bottom: 14px;
+  }
+  .n3-empty-sub {
+    font-size: 13px;
+    letter-spacing: .02em;
+    color: #888;
+    line-height: 1.7;
+  }
+
+  .n3-viewer {
+    overflow-y: auto;
+    padding: 40px;
+  }
+
+  .n3-viewer-empty {
+    padding: 80px 0;
+    animation: n3fadeIn .4s ease both;
+  }
+
+  .n3-viewer-cover {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 260px;
+    object-fit: cover;
+    display: block;
+    background: #eee;
+    margin-bottom: 28px;
+    animation: n3fadeIn .5s ease both;
+    transition: transform .3s, box-shadow .3s;
+  }
+  .n3-viewer-cover:hover { transform: scale(1.02); box-shadow: 0 8px 30px rgba(0,0,0,.15); }
+
+  .n3-viewer-title {
+    font-size: clamp(22px, 4vw, 36px);
+    letter-spacing: -.04em;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 10px;
+    word-break: break-word;
+    animation: n3fadeIn .5s .05s ease both;
+  }
+
+  .n3-viewer-artist {
+    font-size: 13px;
+    letter-spacing: .04em;
+    color: #888;
+    margin-bottom: 20px;
+    animation: n3fadeIn .5s .1s ease both;
+  }
+
+  .n3-meta-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    animation: n3fadeIn .5s .15s ease both;
+  }
+
+  .n3-meta-pill {
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    border: 1px solid #000;
+    padding: 6px 12px;
+    color: #000;
+    transition: background .15s, color .15s;
+    cursor: default;
+  }
+  .n3-meta-pill:hover { background: #000; color: #fff; }
+
+  .n3-viewer-meta-label {
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 16px;
+    display: block;
+    animation: n3fadeIn .5s .2s ease both;
+  }
+
+  .n3-track {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+    transition: background .12s, padding-left .12s;
+    animation: n3fadeIn .3s ease both;
+  }
+  .n3-track:last-child { border-bottom: none; }
+  .n3-track:hover { background: #f9f9f9; padding-left: 6px; }
+
+  .n3-track-no {
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: #bbb;
+    width: 20px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .n3-track-info { flex: 1; min-width: 0; }
+  .n3-track-name {
+    font-size: 13px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .n3-track-artist {
+    font-size: 11px;
+    color: #888;
+    letter-spacing: .03em;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .n3-track-dur {
+    font-size: 11px;
+    color: #888;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+  }
+
+  .n3-back {
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    border: 1px solid #000;
+    padding: 8px 16px;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: #000;
+    margin-bottom: 28px;
+    display: none;
+    transition: opacity .15s, transform .12s;
+  }
+  .n3-back:hover { opacity: .6; transform: translateX(-3px); }
+
+  .n3-spinner {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: n3spin .8s linear infinite;
+    margin: 40px auto;
+  }
+
+  /* Download button */
+  .n3-dl-btn {
+    display: inline-block;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    border: 1px solid #000;
+    padding: 10px 22px;
+    background: none;
+    color: #000;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, color .15s, transform .12s;
+    animation: n3fadeIn .5s .25s ease both;
+  }
+  .n3-dl-btn:hover { background: #000; color: #fff; }
+  .n3-dl-btn:active { transform: scale(.97); }
+  .n3-dl-btn.downloading {
+    animation: n3dlPulse .9s ease infinite;
+    opacity: .7;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Password Modal */
+  .n3-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    animation: n3overlayIn .2s ease both;
+  }
+  .n3-modal-overlay.active { display: flex; }
+
+  .n3-modal-box {
+    background: #fff;
+    color: #000;
+    border: 1px solid #ddd;
+    padding: 44px 40px 36px;
+    max-width: 440px;
+    width: calc(100% - 40px);
+    animation: n3modalIn .25s ease both;
+    position: relative;
+  }
+
+  .n3-modal-icon {
+    font-size: 28px;
+    margin-bottom: 18px;
+    letter-spacing: 0;
+  }
+
+  .n3-modal-title {
+    font-size: 18px;
+    letter-spacing: -.03em;
+    font-weight: 400;
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+
+  .n3-modal-body {
+    font-size: 12px;
+    letter-spacing: .03em;
+    color: #666;
+    line-height: 1.75;
+    margin-bottom: 28px;
+  }
+  @media (prefers-color-scheme: dark) { .n3-modal-body { color: #aaa; } }
+
+  .n3-modal-input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    color: #000;
+    padding: 0 16px;
+    font-size: 13px;
+    letter-spacing: .04em;
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 14px;
+    transition: border-color .2s;
+    border-radius: 0;
+  }
+  .n3-modal-input:focus { border-color: #888; }
+  .n3-modal-input.shake { animation: n3shake .35s ease; }
+
+  .n3-modal-err {
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: #c00;
+    margin-bottom: 14px;
+    min-height: 16px;
+    transition: opacity .2s;
+  }
+
+  .n3-modal-btns {
+    display: flex;
+    gap: 12px;
+  }
+
+  .n3-modal-submit {
+    flex: 1;
+    height: 44px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .15s;
+  }
+  .n3-modal-submit:hover { opacity: .75; }
+
+  .n3-modal-cancel {
+    height: 44px;
+    padding: 0 20px;
+    background: none;
+    color: #888;
+    border: 1px solid #ccc;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .15s;
+  }
+  .n3-modal-cancel:hover { opacity: .6; }
+  @media (prefers-color-scheme: dark) {
+    .n3-modal-submit { background: #fff; color: #000; border-color: #fff; }
+    .n3-modal-cancel { border-color: #444; }
+  }
+
+  /* Notification toast */
+  #n3-notif-stack {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .n3-notif {
+    background: #fff;
+    color: #000;
+    border: 1px solid #ddd;
+    padding: 14px 18px;
+    font-size: 11px;
+    letter-spacing: .06em;
+    max-width: 300px;
+    line-height: 1.55;
+    pointer-events: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,.1);
+  }
+  .n3-notif.entering { animation: n3notifIn .3s ease both; }
+  .n3-notif.leaving { animation: n3notifOut .3s ease both; }
+  .n3-notif-title { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 5px; font-weight: 500; }
+  .n3-notif-body { color: #666; }
+  @media (prefers-color-scheme: dark) { .n3-notif-body { color: #aaa; } }
+  .n3-notif-err .n3-notif-title { color: #c00; }
+  .n3-notif-ok .n3-notif-title { color: #080; }
+
+  /* Validation steps inside modal */
+  .n3-val-steps { text-align:left; }
+  .n3-val-step {
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: #888;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .n3-val-step.visible { opacity: 1; }
+  .n3-val-step.done { color: #000; }
+  @media (prefers-color-scheme: dark) { .n3-val-step.done { color: #fff; } }
+  .n3-val-step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ccc;
+    flex-shrink: 0;
+    transition: background .3s;
+  }
+  .n3-val-step.done .n3-val-step-dot { background: #000; }
+  @media (prefers-color-scheme: dark) { .n3-val-step.done .n3-val-step-dot { background: #fff; } }
+
+  /* Download panel */
+  .n3-panel-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .n3-panel-btn {
+    border: 1px solid #ccc;
+    background: none;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, border-color .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .n3-panel-btn:hover { background: #f5f5f5; border-color: #000; }
+  @media (prefers-color-scheme: dark) {
+    .n3-panel-btn { border-color: #333; }
+    .n3-panel-btn:hover { background: #111; border-color: #fff; }
+  }
+  .n3-panel-btn-title { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #000; }
+  @media (prefers-color-scheme: dark) { .n3-panel-btn-title { color: #fff; } }
+  .n3-panel-btn-sub { font-size: 10px; letter-spacing: .06em; color: #888; }
+
+  .n3-song-select {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    color: #000;
+    font-size: 12px;
+    font-family: inherit;
+    padding: 0 10px;
+    outline: none;
+    border-radius: 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    .n3-song-select { background: #111; color: #fff; border-color: #444; }
+  }
+
+  .n3-panel-prog-label {
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+    animation: n3pulse 1.5s ease infinite;
+  }
+  .n3-panel-prog-steps { margin-top: 10px; }
+  .n3-panel-prog-step {
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: #aaa;
+    padding: 3px 0;
+    opacity: 0;
+    transition: opacity .4s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .n3-panel-prog-step.visible { opacity: 1; }
+  .n3-panel-prog-step.done { color: #555; }
+  @media (prefers-color-scheme: dark) { .n3-panel-prog-step.done { color: #999; } }
+
+  /* Orange scrolling banner */
+  .n3-banner {
+    background: #1a7a3a;
+    color: #fff;
+    height: 34px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    position: sticky;
+    top: 60px;
+    z-index: 9;
+  }
+  .n3-banner-track {
+    display: flex;
+    white-space: nowrap;
+    animation: n3bannerScroll 22s linear infinite;
+  }
+  .n3-banner-text {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    padding: 0 60px;
+    flex-shrink: 0;
+  }
+  @keyframes n3bannerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Play button on tracks */
+  .n3-play-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px;
+    color: #000;
+    transition: background .15s, color .15s, transform .12s;
+    padding: 0;
+    font-family: inherit;
+  }
+  .n3-play-btn:hover { background: #000; color: #fff; transform: scale(1.1); }
+  .n3-play-btn.playing { background: #000; color: #fff; }
+  @media (prefers-color-scheme: dark) {
+    .n3-play-btn { color: #fff; }
+    .n3-play-btn:hover { background: #fff; color: #000; }
+    .n3-play-btn.playing { background: #fff; color: #000; }
+  }
+
+  @media (max-width: 700px) {
+    .n3-body { grid-template-columns: 1fr; }
+    .n3-results { border-right: none; border-bottom: 1px solid #eee; }
+    .n3-nav { padding: 0 20px; }
+    .n3-hero { padding: 50px 20px 40px; }
+    .n3-result-item { padding: 16px 20px; }
+    .n3-section-label, .n3-status { padding-left: 20px; padding-right: 20px; }
+    .n3-empty { padding: 50px 20px; }
+    .n3-viewer { padding: 24px 20px; }
+    #n3-notif-stack { bottom: 16px; right: 16px; }
+    .n3-modal-box { padding: 32px 24px 28px; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #n3-now-playing { background: #000 !important; border-top-color: #fff !important; }
+    #n3-np-label { color: #fff !important; }
+    #n3-now-playing button { border-color: #fff !important; color: #fff !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="n3xt-app">
+  <nav class="n3-nav">
+    <div class="n3-wordmark">N3XT</div>
+    <div class="n3-nav-right">Album Search</div>
+  </nav>
+
+  <div class="n3-banner">
+    <div class="n3-banner-track">
+      <span class="n3-banner-text">✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp; ✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp;</span>
+      <span class="n3-banner-text">✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp; ✓ We are almost done fixing it — for some users it may already work. Please wait while we fully resolve it &nbsp;&nbsp;·&nbsp;&nbsp; ✓ Apple Music tracks are starting to work and can now be reproduced for some users &nbsp;&nbsp;·&nbsp;&nbsp;</span>
+    </div>
+  </div>
+
+  <div class="n3-hero">
+    <h1 class="n3-hero-title">N3XT</h1>
+    <div class="n3-search-row">
+      <input id="n3-input" class="n3-input" placeholder="Search albums..." autocomplete="off" spellcheck="false" />
+      <button class="n3-btn" id="n3-btn">Search</button>
+    </div>
+  </div>
+
+  <div class="n3-body">
+    <div class="n3-results" id="n3-results">
+      <div class="n3-section-label">Results</div>
+      <div class="n3-empty">
+        <div class="n3-empty-title">Search an album.</div>
+        <div class="n3-empty-sub">Type an album name and press search.<br>Click any result to view the tracklist.</div>
+      </div>
+    </div>
+
+    <div class="n3-viewer" id="n3-viewer">
+      <div class="n3-viewer-empty">
+        <div class="n3-empty-title">Select a result.</div>
+        <div class="n3-empty-sub">Full tracklist and metadata<br>will appear here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Now Playing Bar -->
+<div id="n3-now-playing" style="display:none;position:fixed;bottom:0;left:0;right:0;height:54px;background:#fff;border-top:1px solid #000;z-index:50;display:none;align-items:center;justify-content:center;gap:14px;animation:n3fadeIn .3s ease both;">
+  <span id="n3-np-pulse" style="width:8px;height:8px;border-radius:50%;background:#1a7a3a;animation:n3pulse 1.2s ease infinite;flex-shrink:0;"></span>
+  <span id="n3-np-label" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;"></span>
+  <button onclick="stopCurrentAudio()" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #000;background:none;color:#000;padding:6px 14px;cursor:pointer;font-family:inherit;flex-shrink:0;">■ Stop</button>
+</div>
+
+<!-- Password Modal -->
+<div class="n3-modal-overlay" id="n3-modal">
+  <div class="n3-modal-box" id="n3-modal-box">
+
+    <!-- Step 1: password entry -->
+    <div id="n3-modal-step-pw">
+      <div class="n3-modal-icon">🔒</div>
+      <div class="n3-modal-title">Authorization Required</div>
+      <div class="n3-modal-body">
+        These albums have been detected in our systems as leaked albums — not officially released. Only authorized personnel may access this content. Enter your credentials to continue.
+      </div>
+      <input class="n3-modal-input" id="n3-modal-input" type="password" placeholder="Enter password..." autocomplete="off" />
+      <div class="n3-modal-err" id="n3-modal-err"></div>
+      <div class="n3-modal-btns">
+        <button class="n3-modal-submit" id="n3-modal-submit">Confirm</button>
+        <button class="n3-modal-cancel" id="n3-modal-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Step 2: validating credentials -->
+    <div id="n3-modal-step-validating" style="display:none;text-align:center;padding:16px 0 8px;">
+      <div class="n3-modal-icon">⚙️</div>
+      <div class="n3-modal-title" style="margin-bottom:18px;">Validating Credentials</div>
+      <div class="n3-val-steps" id="n3-val-steps"></div>
+    </div>
+
+    <!-- Step 3: download panel -->
+    <div id="n3-modal-step-panel" style="display:none;">
+      <div class="n3-modal-icon">✅</div>
+      <div class="n3-modal-title">Access Granted</div>
+      <div class="n3-modal-body" id="n3-panel-desc">Select what you want to download.</div>
+      <div class="n3-panel-btns">
+        <button class="n3-panel-btn" id="n3-panel-song" onclick="startPanelDownload('song')">
+          <span class="n3-panel-btn-title">Download Single Track</span>
+          <span class="n3-panel-btn-sub">Select one song · ~2 min</span>
+        </button>
+        <button class="n3-panel-btn" id="n3-panel-album" onclick="startPanelDownload('album')">
+          <span class="n3-panel-btn-title">Download Full Album</span>
+          <span class="n3-panel-btn-sub">All tracks · ~4 min</span>
+        </button>
+      </div>
+      <!-- song selector (hidden until song chosen) -->
+      <div id="n3-song-picker" style="display:none;margin-top:16px;">
+        <select class="n3-song-select" id="n3-song-select"></select>
+        <button class="n3-modal-submit" style="margin-top:10px;width:100%;" onclick="confirmSongDownload()">Download Selected</button>
+      </div>
+      <div class="n3-panel-progress" id="n3-panel-progress" style="display:none;">
+        <div class="n3-panel-prog-label" id="n3-panel-prog-label"></div>
+        <div class="n3-ai-bar-wrap" style="margin-top:10px;"><div class="n3-ai-bar" id="n3-panel-bar"></div></div>
+        <div class="n3-panel-prog-steps" id="n3-panel-prog-steps"></div>
+      </div>
+      <button class="n3-modal-cancel" style="margin-top:18px;width:100%;" onclick="closeModal()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Notification stack -->
+<div id="n3-notif-stack"></div>
+
+<script>
+  // ── Title lock ──────────────────────────────────────────────
+  document.title = "N3XT";
+  const titleObserver = new MutationObserver(() => { if (document.title !== "N3XT") document.title = "N3XT"; });
+  const titleEl = document.querySelector("title");
+  if (titleEl) titleObserver.observe(titleEl, { childList: true, characterData: true, subtree: true });
+
+  // ── Data ──────────────────────────────────────────────────────
+  const fakeAlbum = {
+    id: "fake-sad-boyz",
+    name: "$AD BOYZ 4 LIFE III",
+    artist: "Junior H",
+    year: "2026",
+    source: "Instagram",
+    isLeaked: true,
+    cover: "",
+    tracks: [
+      { name: "24K", artist: "Junior H", length: "3:27" },
+      { name: "Fotos Que Borré", artist: "Junior H, Tito Double P", length: "3:16" },
+      { name: "Bohemio", artist: "Junior H", length: "2:53" },
+      { name: "Vogue Girl", artist: "Junior H, Chino Pacas", length: "3:51" },
+      { name: "Otro Polvo", artist: "Junior H, Gael Valenzuela", length: "3:03" },
+      { name: "Vestido Rojo", artist: "Junior H, Luis R Conriquez", length: "3:57" },
+      { name: "Tormenta", artist: "Junior H", length: "3:06" },
+      { name: "Ya No Llames", artist: "Junior H, Gabriel SSOE", length: "3:00" },
+      { name: "Diez De Copas", artist: "Junior H, Peso Pluma", length: "3:38" },
+      { name: "Noche Eterna", artist: "Junior H", length: "3:21" },
+      { name: "Cicatrices", artist: "Junior H, Jasiel Núñez", length: "3:55" },
+      { name: "Mi Nombre En La Radio", artist: "Junior H", length: "2:53" },
+      { name: "L'Amour", artist: "Junior H, Eslabon Armado", length: "4:04" },
+      { name: "Milán", artist: "Junior H", length: "3:33" },
+      { name: "Reina De Mi Amor", artist: "Junior H", length: "2:39" },
+      { name: "Sirena", artist: "Junior H, Neton Vega", length: "4:17" },
+      { name: "Fin Del Mundo", artist: "Junior H", length: "2:35" }
+    ]
+  };
+
+  const bovedeAlbum = {
+    id: "fake-la-boveda",
+    name: "LA BOVEDA",
+    artist: "Natanael Cano",
+    year: "2026",
+    source: "Telegram",
+    isLeaked: true,
+    cover: "https://github.com/Rainfun/Pulse/blob/main/image.png?raw=true",
+    tracks: [
+      { name: "POR AMARTE ASI", artist: "Natanael Cano", length: "3:14" },
+      { name: "AETERNUM", artist: "Natanael Cano", length: "2:58" },
+      { name: "APELATIVO", artist: "Natanael Cano", length: "3:06" },
+      { name: "AUN RECUERDO", artist: "Natanael Cano", length: "2:47" },
+      { name: "CRISTIANO RONALDO", artist: "Natanael Cano", length: "3:21" },
+      { name: "MAR AZUL", artist: "Natanael Cano", length: "2:55" },
+      { name: "PA LA MANA", artist: "Natanael Cano", length: "2:49" },
+      { name: "APREVENIDO", artist: "Natanael Cano", length: "2:18" },
+      { name: "FANTASMA", artist: "Natanael Cano", length: "3:02" },
+      { name: "CIELO ROJO", artist: "Natanael Cano", length: "3:17" },
+      { name: "BOHEMIO SOLITARIO", artist: "Natanael Cano", length: "2:44" },
+      { name: "LO QUE FUI", artist: "Natanael Cano", length: "3:08" },
+      { name: "NOCHE DE LLANTO", artist: "Natanael Cano", length: "2:51" },
+      { name: "CORONA DE ESPINAS", artist: "Natanael Cano", length: "3:33" },
+      { name: "ENTRE SOMBRAS", artist: "Natanael Cano", length: "2:39" },
+      { name: "SIN RETORNO", artist: "Natanael Cano", length: "3:10" },
+      { name: "ULTIMO BRINDIS", artist: "Natanael Cano", length: "2:57" },
+      { name: "LA BOVEDA", artist: "Natanael Cano", length: "4:01" }
+    ]
+  };
+
+  // ── Refs ──────────────────────────────────────────────────────
+  const inp       = document.getElementById("n3-input");
+  const btn       = document.getElementById("n3-btn");
+  const resultsEl = document.getElementById("n3-results");
+  const viewerEl  = document.getElementById("n3-viewer");
+  const modal     = document.getElementById("n3-modal");
+  const modalInp  = document.getElementById("n3-modal-input");
+  const modalErr  = document.getElementById("n3-modal-err");
+  const modalOk   = document.getElementById("n3-modal-submit");
+  const modalX    = document.getElementById("n3-modal-cancel");
+  const notifStack= document.getElementById("n3-notif-stack");
+
+  // ── Utils ─────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function fmtMs(ms) {
+    if (!ms) return "--:--";
+    const m = Math.floor(ms / 60000);
+    const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
+    return m + ":" + s;
+  }
+  function year(d) { return d ? String(d).slice(0, 4) : "—"; }
+
+  // ── Notifications ─────────────────────────────────────────────
+  function showNotif(title, body, type = "err") {
+    const el = document.createElement("div");
+    el.className = `n3-notif n3-notif-${type} entering`;
+    el.innerHTML = `<div class="n3-notif-title">${esc(title)}</div><div class="n3-notif-body">${esc(body)}</div>`;
+    notifStack.appendChild(el);
+    setTimeout(() => {
+      el.classList.remove("entering");
+      el.classList.add("leaving");
+      el.addEventListener("animationend", () => el.remove(), { once: true });
+    }, 4000);
+  }
+
+  // ── Modal state ───────────────────────────────────────────────
+  let currentLeakedAlbum = null; // tracks which leaked album is open
+
+  function openModal(albumObj) {
+    currentLeakedAlbum = albumObj;
+    showStep("pw");
+    modalInp.value = "";
+    modalErr.textContent = "";
+    modal.classList.add("active");
+    setTimeout(() => modalInp.focus(), 120);
+  }
+  function closeModal() {
+    modal.classList.remove("active");
+    // reset to pw step after close animation
+    setTimeout(() => showStep("pw"), 300);
+  }
+  function showStep(step) {
+    document.getElementById("n3-modal-step-pw").style.display         = step === "pw"         ? "" : "none";
+    document.getElementById("n3-modal-step-validating").style.display = step === "validating" ? "" : "none";
+    document.getElementById("n3-modal-step-panel").style.display      = step === "panel"      ? "" : "none";
+  }
+
+  modalX.addEventListener("click", closeModal);
+  modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+  modalInp.addEventListener("keydown", e => { if (e.key === "Enter") tryPassword(); });
+  modalOk.addEventListener("click", tryPassword);
+
+  const VAL_STEPS = [
+    "Connecting to authorization server...",
+    "Encrypting credentials...",
+    "Processing credentials...",
+    "Validating access token...",
+    "Checking personnel registry...",
+    "Access granted."
+  ];
+
+  function tryPassword() {
+    const val = modalInp.value.trim();
+    if (!val) { modalErr.textContent = "Password is required."; return; }
+
+    if (val.toLowerCase() !== "admin") {
+      modalErr.textContent = "Incorrect password. Access denied.";
+      modalInp.classList.remove("shake");
+      void modalInp.offsetWidth;
+      modalInp.classList.add("shake");
+      modalInp.value = "";
+      setTimeout(() => modalInp.classList.remove("shake"), 400);
+      return;
+    }
+
+    // Correct password — show validating screen
+    showStep("validating");
+    const valStepsEl = document.getElementById("n3-val-steps");
+    valStepsEl.innerHTML = "";
+    const stepEls = VAL_STEPS.map(text => {
+      const d = document.createElement("div");
+      d.className = "n3-val-step";
+      d.innerHTML = `<span class="n3-val-step-dot"></span><span>${text}</span>`;
+      valStepsEl.appendChild(d);
+      return d;
+    });
+
+    const stepDelay = 380;
+    stepEls.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add("visible");
+        if (i > 0) stepEls[i - 1].classList.add("done");
+        if (i === stepEls.length - 1) {
+          el.classList.add("done");
+          // After last step, open the panel
+          setTimeout(() => openPanel(), 600);
+        }
+      }, i * stepDelay + 300);
+    });
+  }
+
+  function openPanel() {
+    showStep("panel");
+    document.getElementById("n3-panel-progress").style.display = "none";
+    document.getElementById("n3-song-picker").style.display = "none";
+    document.getElementById("n3-panel-song").disabled = false;
+    document.getElementById("n3-panel-album").disabled = false;
+
+    // Populate song selector if we have track data
+    const sel = document.getElementById("n3-song-select");
+    sel.innerHTML = "";
+    if (currentLeakedAlbum && currentLeakedAlbum.tracks) {
+      currentLeakedAlbum.tracks.forEach((t, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `${i + 1}. ${t.name}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    const desc = document.getElementById("n3-panel-desc");
+    desc.textContent = currentLeakedAlbum ? `"${currentLeakedAlbum.name}" — select your download option below.` : "Select your download option below.";
+  }
+
+  function startPanelDownload(type) {
+    if (type === "song") {
+      document.getElementById("n3-song-picker").style.display = "";
+      document.getElementById("n3-panel-progress").style.display = "none";
+      return;
+    }
+    // Full album
+    runPanelProgress("album");
+  }
+
+  function confirmSongDownload() {
+    document.getElementById("n3-song-picker").style.display = "none";
+    runPanelProgress("song");
+  }
+
+  const SONG_STEPS = [
+    "Locating track in secure vault...",
+    "Decrypting audio file...",
+    "Connecting to distribution node...",
+    "Fetching audio stream from database...",
+    "Verifying file integrity...",
+    "Preparing download package...",
+    "Finalizing transfer..."
+  ];
+  const ALBUM_STEPS = [
+    "Authenticating download session...",
+    "Locating album in secure vault...",
+    "Decrypting audio archive...",
+    "Connecting to primary distribution node...",
+    "Fetching tracks from database — 1 of 18...",
+    "Fetching tracks from database — 6 of 18...",
+    "Fetching tracks from database — 12 of 18...",
+    "Fetching tracks from database — 18 of 18...",
+    "Compressing audio archive...",
+    "Verifying file checksums...",
+    "Packaging download bundle...",
+    "Preparing secure transfer...",
+    "Transfer initializing..."
+  ];
+
+  function runPanelProgress(type) {
+    const isSong = type === "song";
+    const totalMs = isSong ? 120000 : 240000; // 2 min or 4 min
+    const steps = isSong ? SONG_STEPS : ALBUM_STEPS;
+    const label = isSong ? "Downloading track..." : "Downloading full album...";
+    const albumName = currentLeakedAlbum ? currentLeakedAlbum.name : "Album";
+    const songName = isSong && currentLeakedAlbum ? currentLeakedAlbum.tracks[document.getElementById("n3-song-select").value]?.name || "Track" : null;
+
+    // Disable buttons
+    document.getElementById("n3-panel-song").disabled = true;
+    document.getElementById("n3-panel-album").disabled = true;
+
+    const progEl = document.getElementById("n3-panel-progress");
+    const progLabel = document.getElementById("n3-panel-prog-label");
+    const progBar = document.getElementById("n3-panel-bar");
+    const progSteps = document.getElementById("n3-panel-prog-steps");
+
+    progEl.style.display = "";
+    progLabel.textContent = label;
+    progBar.style.width = "0%";
+    progSteps.innerHTML = "";
+
+    // Render step els
+    const stepEls = steps.map(text => {
+      const d = document.createElement("div");
+      d.className = "n3-panel-prog-step";
+      d.innerHTML = `<span>›</span><span>${text}</span>`;
+      progSteps.appendChild(d);
+      return d;
+    });
+
+    // Animate bar
+    const barStart = performance.now();
+    let barFrame;
+    function animBar() {
+      const pct = Math.min((performance.now() - barStart) / totalMs * 100, 95);
+      progBar.style.width = pct + "%";
+      if (pct < 95) barFrame = requestAnimationFrame(animBar);
+    }
+    barFrame = requestAnimationFrame(animBar);
+
+    // Show steps evenly
+    const stepInterval = (totalMs * 0.85) / steps.length;
+    stepEls.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add("visible");
+        if (i > 0) stepEls[i - 1].classList.add("done");
+      }, i * stepInterval);
+    });
+
+    // Fail at the end
+    setTimeout(() => {
+      cancelAnimationFrame(barFrame);
+      progBar.style.transition = "width .3s ease";
+      progBar.style.width = "100%";
+      if (stepEls.length) stepEls[stepEls.length - 1].classList.add("done");
+
+      setTimeout(() => {
+        closeModal();
+        if (isSong) {
+          showNotif("Download Failed", `"${songName}" — transfer error. The file could not be retrieved from the server.`, "err");
+        } else {
+          showNotif("Download Failed", `"${albumName}" — connection lost during transfer. Please try again later.`, "err");
+        }
+      }, 600);
+    }, totalMs);
+  }
+
+  // ── Download simulation (regular albums) ──────────────────────
+  function simulateDownload(albumName, btnEl) {
+    btnEl.textContent = "Downloading...";
+    btnEl.classList.add("downloading");
+    setTimeout(() => {
+      btnEl.textContent = "Download Album";
+      btnEl.classList.remove("downloading");
+      showNotif("Download Failed", `"${albumName}" could not be downloaded. Please try again later.`, "err");
+    }, 2200 + Math.random() * 800);
+  }
+
+  // ── Search ────────────────────────────────────────────────────
+  btn.addEventListener("click", doSearch);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
+
+  const AI_STEPS = [
+    "Initializing neural search engine...",
+    "Parsing query semantics...",
+    "Scanning music databases...",
+    "Cross-referencing release metadata...",
+    "Analyzing catalog index...",
+    "Fetching album fingerprints...",
+    "Running similarity matching...",
+    "Filtering duplicate entries...",
+    "Verifying source authenticity...",
+    "Compiling final results..."
+  ];
+
+  // Total delay: ~20 seconds
+  const AI_TOTAL_MS = 20000;
+
+  async function doSearch() {
+    const q = inp.value.trim();
+    if (!q) return;
+
+    const ql = q.toLowerCase();
+    const injectFake = ql.includes("sad") || ql.includes("$ad") || ql.includes("boyz") || ql.includes("junior") || ql.includes("4 life");
+    const injectBoveda = ql.includes("boveda") || ql.includes("bóveda") || ql.includes("natanael") || ql.includes("cano") || ql.includes("la boveda");
+
+    // Start real fetch immediately in background
+    let fetchPromise;
+    try {
+      fetchPromise = fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=16`);
+    } catch(e) { fetchPromise = Promise.reject(e); }
+
+    // Render AI loader
+    resultsEl.innerHTML = `
+      <div class="n3-section-label">Results</div>
+      <div class="n3-ai-loader">
+        <div class="n3-ai-loader-label">
+          N3XT AI — Processing
+          <span class="n3-ai-dots">
+            <span class="n3-ai-dot"></span>
+            <span class="n3-ai-dot"></span>
+            <span class="n3-ai-dot"></span>
+          </span>
+        </div>
+        <div class="n3-ai-bar-wrap"><div class="n3-ai-bar" id="n3-ai-bar"></div></div>
+        <div class="n3-ai-steps" id="n3-ai-steps"></div>
+      </div>`;
+
+    viewerEl.innerHTML = `<div class="n3-viewer-empty"><div class="n3-empty-title">Select a result.</div><div class="n3-empty-sub">Full tracklist and metadata<br>will appear here.</div></div>`;
+
+    const bar = document.getElementById("n3-ai-bar");
+    const stepsEl = document.getElementById("n3-ai-steps");
+
+    // Animate progress bar over AI_TOTAL_MS
+    const barStart = performance.now();
+    let barFrame;
+    function animBar() {
+      const pct = Math.min((performance.now() - barStart) / AI_TOTAL_MS * 100, 95);
+      if (bar) bar.style.width = pct + "%";
+      if (pct < 95) barFrame = requestAnimationFrame(animBar);
+    }
+    barFrame = requestAnimationFrame(animBar);
+
+    // Show steps one by one
+    const stepInterval = AI_TOTAL_MS / AI_STEPS.length;
+    const stepEls = [];
+    AI_STEPS.forEach((text, i) => {
+      const div = document.createElement("div");
+      div.className = "n3-ai-step";
+      div.innerHTML = `<span class="n3-ai-step-dot"></span><span>${text}</span>`;
+      if (stepsEl) stepsEl.appendChild(div);
+      stepEls.push(div);
+      setTimeout(() => {
+        div.classList.add("visible");
+        if (i > 0 && stepEls[i-1]) stepEls[i-1].classList.add("done");
+        if (i === AI_STEPS.length - 1) div.classList.add("done");
+      }, i * stepInterval);
+    });
+
+    // Wait for fake delay AND real fetch, whichever is longer
+    const [, fetchResult] = await Promise.all([
+      new Promise(r => setTimeout(r, AI_TOTAL_MS)),
+      fetchPromise.then(r => r.json()).catch(() => null)
+    ]);
+
+    cancelAnimationFrame(barFrame);
+    if (bar) bar.style.transition = "width .4s ease";
+    if (bar) bar.style.width = "100%";
+    await new Promise(r => setTimeout(r, 420));
+
+    if (!fetchResult) {
+      resultsEl.innerHTML = `<div class="n3-section-label">Results</div><div class="n3-empty"><div class="n3-empty-title">Search failed.</div><div class="n3-empty-sub">Check your connection and try again.</div></div>`;
+      return;
+    }
+
+    let items = (fetchResult.results || []).filter((v, i, a) => v.collectionType !== 'Single' && a.findIndex(x => x.collectionId === v.collectionId) === i);
+    renderResults(items, injectFake, injectBoveda, q);
+  }
+
+  function renderResults(items, injectFake, injectBoveda, q) {
+    const total = items.length + (injectFake ? 1 : 0) + (injectBoveda ? 1 : 0);
+    let html = `<div class="n3-section-label">Results</div><div class="n3-status">${total} album${total !== 1 ? "s" : ""} — "${esc(q)}"</div>`;
+
+    if (!total) {
+      html += `<div class="n3-empty"><div class="n3-empty-title">No results.</div><div class="n3-empty-sub">Try a different name or artist.</div></div>`;
+      resultsEl.innerHTML = html;
+      return;
+    }
+
+    if (injectFake) {
+      html += `<div class="n3-result-item" onclick="openFake()">
+        <div style="width:52px;height:52px;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:10px;letter-spacing:.1em;color:#fff;text-transform:uppercase;">IG</span>
+        </div>
+        <div class="n3-result-info">
+          <div class="n3-result-name">${esc(fakeAlbum.name)}</div>
+          <div class="n3-result-artist">${esc(fakeAlbum.artist)}</div>
+          <div class="n3-result-source">Instagram · Custom</div>
+        </div>
+      </div>`;
+    }
+
+    if (injectBoveda) {
+      html += `<div class="n3-result-item" onclick="openBoveda()">
+        <img class="n3-result-thumb" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy" style="object-fit:cover;">
+        <div class="n3-result-info">
+          <div class="n3-result-name">${esc(bovedeAlbum.name)}</div>
+          <div class="n3-result-artist">${esc(bovedeAlbum.artist)}</div>
+          <div class="n3-result-source">Telegram · Custom</div>
+        </div>
+      </div>`;
+    }
+
+    items.forEach((album, idx) => {
+      const cover = (album.artworkUrl100 || "").replace("100x100", "300x300");
+      html += `<div class="n3-result-item" style="animation-delay:${idx * 0.04}s" onclick="openAlbum(${album.collectionId})">
+        <img class="n3-result-thumb" src="${esc(cover)}" alt="" loading="lazy">
+        <div class="n3-result-info">
+          <div class="n3-result-name">${esc(album.collectionName || "Unknown")}</div>
+          <div class="n3-result-artist">${esc(album.artistName || "—")}</div>
+          <div class="n3-result-source">Apple Music · ${esc(year(album.releaseDate))}</div>
+        </div>
+      </div>`;
+    });
+
+    resultsEl.innerHTML = html;
+  }
+
+  // ── Viewer: fake leaked album ─────────────────────────────────
+  const DIEZ_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/fileunknownlolcustom.wav";
+  const LAMOUR_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/L'AMOUR.wav";
+  let currentAudio = null;
+  let currentPlayBtn = null;
+  let lamourAttempts = 0;
+
+  // ── Now Playing bar ───────────────────────────────────────────
+  const npBar = document.getElementById("n3-now-playing");
+  const npLabel = document.getElementById("n3-np-label");
+
+  function showNowPlaying(trackName, artistName) {
+    npLabel.textContent = (artistName ? artistName + " — " : "") + trackName;
+    npBar.style.display = "flex";
+    // dark mode fix
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      npBar.style.background = "#000";
+      npBar.style.borderTopColor = "#fff";
+    }
+  }
+  function hideNowPlaying() {
+    npBar.style.display = "none";
+    npLabel.textContent = "";
+  }
+  function stopCurrentAudio() {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if (currentPlayBtn) { currentPlayBtn.innerHTML = "▶"; currentPlayBtn.classList.remove("playing"); currentPlayBtn = null; }
+    hideNowPlaying();
+  }
+  window.stopCurrentAudio = stopCurrentAudio;
+
+  function playTrack(btn, trackName, trackIdx) {
+    // Stop any existing playback
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if (currentPlayBtn && currentPlayBtn !== btn) {
+      currentPlayBtn.innerHTML = "▶";
+      currentPlayBtn.classList.remove("playing");
+    }
+
+    // If same button clicked again while playing, just stop
+    if (btn.classList.contains("playing")) {
+      btn.innerHTML = "▶";
+      btn.classList.remove("playing");
+      currentPlayBtn = null;
+      hideNowPlaying();
+      return;
+    }
+
+    // Track index 8 = "Diez De Copas" (0-based in fakeAlbum.tracks)
+    if (trackIdx === 8) {
+      btn.innerHTML = "■";
+      btn.classList.add("playing");
+      currentPlayBtn = btn;
+      showNowPlaying(trackName, "Junior H");
+      showNotif("Preview Only", `"${trackName}" — this is a preview. Full song requires authorization.`, "err");
+
+      const audio = new Audio(DIEZ_URL);
+      currentAudio = audio;
+      audio.play().catch(() => {
+        showNotif("Playback Error", `Could not load "${trackName}". Check your connection.`, "err");
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        currentAudio = null;
+        hideNowPlaying();
+      });
+
+      // After 17 seconds, stop and show error
+      const errTimer = setTimeout(() => {
+        audio.pause();
+        currentAudio = null;
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        showNotif("Error Loading Track", `"${trackName}" — error loading rest of the song. File may be corrupted or incomplete.`, "err");
+        hideNowPlaying();
+      }, 17000);
+
+      audio.addEventListener("ended", () => {
+        clearTimeout(errTimer);
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        currentAudio = null;
+        hideNowPlaying();
+      }, { once: true });
+
+    // Track index 12 = "L'Amour" (0-based in fakeAlbum.tracks)
+    } else if (trackIdx === 12) {
+      lamourAttempts++;
+
+      // First attempt — fail immediately
+      if (lamourAttempts === 1) {
+        showNotif("Playback Failed", `"${trackName}" — audio file not found on server.`, "err");
+        return;
+      }
+
+      // Second attempt and beyond — play but show error after ~17s
+      btn.innerHTML = "■";
+      btn.classList.add("playing");
+      currentPlayBtn = btn;
+      showNowPlaying(trackName, "Junior H");
+      showNotif("Preview Only", `"${trackName}" — this is a preview. Full song requires authorization.`, "err");
+
+      const audio = new Audio(LAMOUR_URL);
+      currentAudio = audio;
+      audio.play().catch(() => {
+        showNotif("Playback Error", `Could not load "${trackName}". Check your connection.`, "err");
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        currentAudio = null;
+        hideNowPlaying();
+      });
+
+      // After 17 seconds, stop and show error
+      const errTimer = setTimeout(() => {
+        audio.pause();
+        currentAudio = null;
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        showNotif("Error Loading Track", `"${trackName}" — error loading rest of the song. File may be corrupted or incomplete.`, "err");
+        hideNowPlaying();
+      }, 17000);
+
+      audio.addEventListener("ended", () => {
+        clearTimeout(errTimer);
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        currentAudio = null;
+        hideNowPlaying();
+      }, { once: true });
+
+    } else {
+      // All other tracks — fail immediately with notification
+      showNotif("Playback Failed", `"${trackName}" — audio file not found on server.`, "err");
+    }
+  }
+
+  function openFake() {
+    document.title = "N3XT";
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+    let rows = fakeAlbum.tracks.map((t, i) =>
+      `<div class="n3-track" style="animation-delay:${i * 0.025}s">
+        <button class="n3-play-btn" onclick="playTrack(this,'${t.name.replace(/'/g,"\\'")}',${i})" title="Play ${t.name}">▶</button>
+        <span class="n3-track-no">${i + 1}</span>
+        <div class="n3-track-info">
+          <div class="n3-track-name">${esc(t.name)}</div>
+          <div class="n3-track-artist">${esc(t.artist)}</div>
+        </div>
+        <span class="n3-track-dur">${esc(t.length)}</span>
+      </div>`
+    ).join("");
+
+    viewerEl.innerHTML = `
+      <div style="width:100%;aspect-ratio:1;max-width:260px;background:#111;display:flex;align-items:center;justify-content:center;margin-bottom:28px;animation:n3fadeIn .5s ease both;transition:transform .3s,box-shadow .3s;" onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='0 8px 30px rgba(0,0,0,.25)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <span style="font-size:11px;letter-spacing:.2em;color:#666;text-transform:uppercase;">N3XT</span>
+      </div>
+      <div class="n3-viewer-title">${esc(fakeAlbum.name)}</div>
+      <div class="n3-viewer-artist">${esc(fakeAlbum.artist)}</div>
+      <div class="n3-meta-row">
+        <div class="n3-meta-pill">Instagram</div>
+        <div class="n3-meta-pill">${esc(fakeAlbum.year)}</div>
+        <div class="n3-meta-pill">${fakeAlbum.tracks.length} tracks</div>
+      </div>
+      <button class="n3-dl-btn" id="n3-dl-fake" onclick="handleLeakedDownload(this, fakeAlbum)">Download Album</button>
+      <span class="n3-viewer-meta-label" style="display:block;margin-top:20px;">Tracklist</span>
+      ${rows}
+    `;
+  }
+
+  function handleLeakedDownload(btnEl, albumObj) {
+    openModal(albumObj);
+  }
+
+  // ── Viewer: LA BOVEDA leaked album ────────────────────────────
+  function openBoveda() {
+    document.title = "N3XT";
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+    let rows = bovedeAlbum.tracks.map((t, i) =>
+      `<div class="n3-track" style="animation-delay:${i * 0.025}s">
+        <button class="n3-play-btn" onclick="playBoveadaTrack(this,'${t.name.replace(/'/g,"\\'")}',${i})">▶</button>
+        <span class="n3-track-no">${i + 1}</span>
+        <div class="n3-track-info">
+          <div class="n3-track-name">${esc(t.name)}</div>
+          <div class="n3-track-artist">${esc(t.artist)}</div>
+        </div>
+        <span class="n3-track-dur">${esc(t.length)}</span>
+      </div>`
+    ).join("");
+
+    viewerEl.innerHTML = `
+      <img class="n3-viewer-cover" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy">
+      <div class="n3-viewer-title">${esc(bovedeAlbum.name)}</div>
+      <div class="n3-viewer-artist">${esc(bovedeAlbum.artist)}</div>
+      <div class="n3-meta-row">
+        <div class="n3-meta-pill">Telegram</div>
+        <div class="n3-meta-pill">${esc(bovedeAlbum.year)}</div>
+        <div class="n3-meta-pill">${bovedeAlbum.tracks.length} tracks</div>
+      </div>
+      <button class="n3-dl-btn" onclick="handleLeakedDownload(this, bovedeAlbum)">Download Album</button>
+      <span class="n3-viewer-meta-label" style="display:block;margin-top:20px;">Tracklist</span>
+      ${rows}
+    `;
+  }
+
+  const AETERNUM_URL = "https://github.com/Rainfun/Pulse/raw/refs/heads/main/xczxczxczxc.wav";
+
+  function playBoveadaTrack(btn, trackName, trackIdx) {
+    // Stop any existing playback
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if (currentPlayBtn && currentPlayBtn !== btn) {
+      currentPlayBtn.innerHTML = "▶";
+      currentPlayBtn.classList.remove("playing");
+    }
+
+    // If same button clicked again while playing, just stop
+    if (btn.classList.contains("playing")) {
+      btn.innerHTML = "▶";
+      btn.classList.remove("playing");
+      currentPlayBtn = null;
+      hideNowPlaying();
+      return;
+    }
+
+    // Track index 1 = "AETERNUM"
+    if (trackIdx === 1) {
+      btn.innerHTML = "■";
+      btn.classList.add("playing");
+      currentPlayBtn = btn;
+      showNowPlaying(trackName, "Natanael Cano");
+      showNotif("Preview Only", `"${trackName}" — this is a preview. Full song requires authorization.`, "err");
+
+      const audio = new Audio(AETERNUM_URL);
+      currentAudio = audio;
+      audio.play().catch(() => {
+        showNotif("Playback Error", `Could not load "${trackName}". Check your connection.`, "err");
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        currentAudio = null;
+      });
+
+      // After 3 seconds, stop and show error
+      const errTimer = setTimeout(() => {
+        audio.pause();
+        currentAudio = null;
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        showNotif("Error Loading Track", `"${trackName}" — error loading rest of the song. File may be corrupted or incomplete.`, "err");
+        hideNowPlaying();
+      }, 3000);
+
+      audio.addEventListener("ended", () => {
+        clearTimeout(errTimer);
+        btn.innerHTML = "▶";
+        btn.classList.remove("playing");
+        currentPlayBtn = null;
+        currentAudio = null;
+        hideNowPlaying();
+      }, { once: true });
+
+    } else {
+      showNotif("Playback Failed", `"${trackName}" — audio file not found on server.`, "err");
+    }
+  }
+
+  // ── Viewer: real Apple Music album ────────────────────────────
+  async function openAlbum(id) {
+    document.title = "N3XT";
+    viewerEl.innerHTML = `<div class="n3-spinner"></div>`;
+
+    try {
+      const res = await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=song`);
+      const data = await res.json();
+      const all = data.results || [];
+      const album = all[0];
+      const tracks = all.slice(1);
+      if (!album) throw new Error();
+
+      const cover = (album.artworkUrl100 || "").replace("100x100", "600x600");
+      const totalMs = tracks.reduce((a, t) => a + (t.trackTimeMillis || 0), 0);
+      const albumName = album.collectionName || "Unknown";
+
+      let rows = tracks.length
+        ? tracks.map((t, i) => {
+          const preview = t.previewUrl || "";
+          const safePreview = preview.replace(/'/g, "\'");
+          const safeName = (t.trackName || "Unknown").replace(/'/g, "\'");
+          const playBtn = preview
+            ? `<button class="n3-play-btn" onclick="playPreview(this,'${safePreview}','${safeName}')" title="Play 30s preview">▶</button>`
+            : `<button class="n3-play-btn" style="opacity:.3;cursor:default;" title="No preview available" disabled>▶</button>`;
+          return `<div class="n3-track" style="animation-delay:${i * 0.025}s">
+            ${playBtn}
+            <span class="n3-track-no">${i + 1}</span>
+            <div class="n3-track-info">
+              <div class="n3-track-name">${esc(t.trackName || "Unknown")}</div>
+              <div class="n3-track-artist">${esc(t.artistName || album.artistName || "—")}</div>
+            </div>
+            <span class="n3-track-dur">${fmtMs(t.trackTimeMillis)}</span>
+          </div>`;
+        }).join("")
+        : `<div class="n3-empty-sub" style="padding:20px 0;">No tracks returned for this album.</div>`;
+
+      viewerEl.innerHTML = `
+        <img class="n3-viewer-cover" src="${esc(cover)}" alt="" loading="lazy">
+        <div class="n3-viewer-title">${esc(albumName)}</div>
+        <div class="n3-viewer-artist">${esc(album.artistName || "—")}</div>
+        <div class="n3-meta-row">
+          <div class="n3-meta-pill">Apple Music</div>
+          <div class="n3-meta-pill">${esc(year(album.releaseDate))}</div>
+          <div class="n3-meta-pill">${tracks.length} tracks</div>
+          <div class="n3-meta-pill">${fmtMs(totalMs)}</div>
+        </div>
+        <button class="n3-dl-btn" id="n3-dl-real" onclick="handleRealDownload(this, '${esc(albumName)}')">Download Album</button>
+        <span class="n3-viewer-meta-label" style="display:block;margin-top:20px;">Tracklist</span>
+        ${rows}
+      `;
+    } catch {
+      viewerEl.innerHTML = `<div class="n3-viewer-empty"><div class="n3-empty-title">Failed to load.</div><div class="n3-empty-sub">Try another album.</div></div>`;
+    }
+  }
+
+  function handleRealDownload(btnEl, albumName) {
+    simulateDownload(albumName, btnEl);
+  }
+
+  // ── Apple Music preview playback ─────────────────────────────
+  function playPreview(btn, previewUrl, trackName) {
+    // Stop any existing playback
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if (currentPlayBtn && currentPlayBtn !== btn) {
+      currentPlayBtn.innerHTML = "▶";
+      currentPlayBtn.classList.remove("playing");
+    }
+
+    // Toggle off if already playing
+    if (btn.classList.contains("playing")) {
+      btn.innerHTML = "▶";
+      btn.classList.remove("playing");
+      currentPlayBtn = null;
+      hideNowPlaying();
+      return;
+    }
+
+    btn.innerHTML = "■";
+    btn.classList.add("playing");
+    currentPlayBtn = btn;
+    showNowPlaying(trackName, "");
+
+    const audio = new Audio(previewUrl);
+    currentAudio = audio;
+    audio.play().catch(() => {
+      showNotif("Playback Error", `Could not load preview for "${trackName}".`, "err");
+      btn.innerHTML = "▶";
+      btn.classList.remove("playing");
+      currentPlayBtn = null;
+      currentAudio = null;
+      hideNowPlaying();
+    });
+
+    audio.addEventListener("ended", () => {
+      btn.innerHTML = "▶";
+      btn.classList.remove("playing");
+      currentPlayBtn = null;
+      currentAudio = null;
+      hideNowPlaying();
+    }, { once: true });
+  }
+
+  window.playPreview = playPreview;
+  window.openFake = openFake;
+  window.openBoveda = openBoveda;
+  window.openAlbum = openAlbum;
+  window.handleLeakedDownload = handleLeakedDownload;
+  window.handleRealDownload = handleRealDownload;
+  window.startPanelDownload = startPanelDownload;
+  window.confirmSongDownload = confirmSongDownload;
+  window.closeModal = closeModal;
+  window.playTrack = playTrack;
+  window.playBoveadaTrack = playBoveadaTrack;
+  window.startPanelDownload = startPanelDownload;
+  window.confirmSongDownload = confirmSongDownload;
+  window.closeModal = closeModal;
+  window.playTrack = playTrack;
+  window.playBoveadaTrack = playBoveadaTrack;
+</script>
+</body>
+</html>
