@@ -1076,7 +1076,7 @@
       return d;
     });
 
-    const stepDelay = 380;
+    const stepDelay = 120;
     stepEls.forEach((el, i) => {
       setTimeout(() => {
         el.classList.add("visible");
@@ -1084,7 +1084,7 @@
         if (i === stepEls.length - 1) {
           el.classList.add("done");
           // After last step, open the panel
-          setTimeout(() => openPanel(), 600);
+          setTimeout(() => openPanel(), 200);
         }
       }, i * stepDelay + 300);
     });
@@ -1155,7 +1155,7 @@
 
   function runPanelProgress(type) {
     const isSong = type === "song";
-    const totalMs = isSong ? 120000 : 10000; // 2 min or 10 seconds
+    const totalMs = isSong ? 10000 : 10000; // 10 seconds
     const steps = isSong ? SONG_STEPS : ALBUM_STEPS;
     const label = isSong ? "Downloading track..." : "Downloading full album...";
     const albumName = currentLeakedAlbum ? currentLeakedAlbum.name : "Album";
