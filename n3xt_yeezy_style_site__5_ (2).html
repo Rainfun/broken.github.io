@@ -449,6 +449,7 @@ const fakeAlbum = {
     {name:"Fin Del Mundo",artist:"Junior H",len:"2:35"}
   ]
 };
+
 const bovedeAlbum = {
   id:"fake-boveda", name:"LA BOVEDA", artist:"Natanael Cano", year:"2026", source:"Telegram", isLeaked:true, cover:"https://github.com/Rainfun/Pulse/blob/main/image.png?raw=true", dlTime:10000,
   tracks:[
@@ -471,6 +472,20 @@ const leviticoAlbum = {
   ],
   failedCount:16
 };
+
+// ── NEW: Mi Vida En Un Cigarro 3 (failed to load) ─────────────────
+const mivida3Album = {
+  id:"fake-mivida3", name:"Mi Vida En Un Cigarro 3", artist:"Junior H", year:"2026", source:"Instagram", isLeaked:true, cover:"", dlTime:10000,
+  failedCount:14
+};
+
+// ── NEW: Singles ──────────────────────────────────────────────────
+const gataS         = {id:"s-gata",        name:"GATA",           artist:"Junior H",                            year:"2026", source:"Instagram", isSingle:true};
+const tenienteS     = {id:"s-teniente",    name:"EL TENIENTE",    artist:"Junior H & Gael Valenzuela",          year:"2026", source:"Instagram", isSingle:true};
+const changoS       = {id:"s-chango",      name:"EL CHANGO",      artist:"Junior H",                            year:"2026", source:"Instagram", isSingle:true};
+const tigreS        = {id:"s-tigre",       name:"EL TIGRE",       artist:"Junior H",                            year:"2026", source:"Instagram", isSingle:true};
+const criptoS       = {id:"s-cripto",      name:"CRIPTOMONEDAS",  artist:"Junior H, Jorsshh & Calle 24",       year:"2026", source:"Instagram", isSingle:true};
+const s000666       = {id:"s-000666",      name:"000666",         artist:"Junior H",                            year:"2026", source:"Instagram", isSingle:true};
 
 // ── Utils ─────────────────────────────────────────────────────────
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -607,6 +622,59 @@ function openLevitico(){
     ${failRow}`;
 }
 
+// ── Viewer: Mi Vida En Un Cigarro 3 (all failed) ─────────────────
+function openMiVida3(){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  const failRow=`
+    <div class="track" style="opacity:.38;pointer-events:none">
+      <button class="play-btn" disabled>▶</button>
+      <span class="track-no">—</span>
+      <div class="track-info"><div class="track-name" style="color:var(--fg3);font-style:italic">Failed to load tracks</div><div class="track-artist" style="color:var(--accent)">Error: Server returned incomplete archive · ${mivida3Album.failedCount} tracks unavailable</div></div>
+      <span class="track-dur">—</span>
+    </div>`;
+  document.getElementById("viewer").innerHTML=`
+    <div class="viewer-cover-ph"><span>N3XT</span></div>
+    <div class="viewer-title">${esc(mivida3Album.name)}</div>
+    <div class="viewer-artist">${esc(mivida3Album.artist)}</div>
+    <div class="meta-row">
+      <span class="mpill" style="background:#833ab4;color:#fff">Instagram</span>
+      <span class="mpill">${esc(mivida3Album.year)}</span>
+      <span class="mpill">Failed archive</span>
+    </div>
+    <button class="dl-btn" onclick="handleLeakedDL(mivida3Album)">⬇ Download Album</button>
+    <span class="tl-label">Tracklist</span>
+    ${failRow}`;
+}
+
+// ── Viewer: Single (generic, no playback) ─────────────────────────
+function openSingle(s){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  const srcColor = s.source==="Telegram" ? "#2ca5e0" : "#833ab4";
+  document.getElementById("viewer").innerHTML=`
+    <div class="viewer-cover-ph" style="border-radius:50%;max-width:160px"><span>N3XT</span></div>
+    <div class="single-banner">
+      <div class="single-banner-icon">🎵</div>
+      <div class="single-banner-info">
+        <div class="single-banner-title">Single</div>
+        <div class="single-banner-sub">This is a standalone single release</div>
+      </div>
+    </div>
+    <div class="viewer-title">${esc(s.name)}</div>
+    <div class="viewer-artist">${esc(s.artist)}</div>
+    <div class="meta-row">
+      <span class="mpill" style="background:${srcColor};color:#fff">${esc(s.source)}</span>
+      <span class="mpill">${esc(s.year)}</span>
+      <span class="mpill">Single</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 6px 20px;border-bottom:1px solid var(--border2)">
+      <button class="play-btn" style="width:52px;height:52px;font-size:14px;border-width:2px" onclick="showNotif('Playback Failed','&quot;${esc(s.name)}&quot; — audio file not found on server.','err')">▶</button>
+      <div>
+        <div style="font-size:14px;font-weight:600">${esc(s.name)}</div>
+        <div style="font-size:12px;color:var(--fg3);margin-top:2px">${esc(s.artist)}</div>
+      </div>
+    </div>`;
+}
+
 // ── Viewer: fakeAlbum ─────────────────────────────────────────────
 function openFake(){
   if(currentAudio){currentAudio.pause();currentAudio=null;}
@@ -673,7 +741,6 @@ async function openAlbum(id){
     }).join(""):`<div class="empty-sub" style="padding:14px 0">No tracks found.</div>`;
 
     if(isSingle){
-      // Single UI — centered, prominent, no download button
       const preview=tracks[0]?.previewUrl||"";
       const sn=(tracks[0]?.trackName||albumName).replace(/'/g,"\\'");
       const sa=artistName.replace(/'/g,"\\'");
@@ -824,12 +891,30 @@ si.addEventListener("keydown",e=>{if(e.key==="Enter")doSearch();});
 const AI_STEPS=["Initializing neural search engine...","Parsing query semantics...","Scanning music databases...","Cross-referencing release metadata...","Analyzing catalog index...","Fetching album fingerprints...","Running similarity matching...","Filtering duplicate entries...","Verifying source authenticity...","Compiling final results..."];
 const AI_MS=20000;
 
+// ── keyword matchers ──────────────────────────────────────────────
+function matchesJunior(q){return q.includes("junior")||q.includes("junior h");}
+
 async function doSearch(){
   const q=si.value.trim(); if(!q)return;
   const ql=q.toLowerCase();
-  const fake=ql.includes("sad")||ql.includes("$ad")||ql.includes("boyz")||ql.includes("junior")||ql.includes("4 life");
-  const boveda=ql.includes("boveda")||ql.includes("bóveda")||ql.includes("natanael")||ql.includes("cano")||ql.includes("la boveda");
-  const levitico=ql.includes("levitico")||ql.includes("levítico")||ql.includes("peso pluma")||ql.includes("peso");
+
+  // existing albums / artists
+  const fake      = ql.includes("sad")||ql.includes("$ad")||ql.includes("boyz")||ql.includes("4 life")||(matchesJunior(ql)&&ql.includes("boyz"));
+  const boveda    = ql.includes("boveda")||ql.includes("bóveda")||ql.includes("natanael")||ql.includes("cano")||ql.includes("la boveda");
+  const levitico  = ql.includes("levitico")||ql.includes("levítico")||ql.includes("peso pluma")||ql.includes("peso");
+
+  // new items
+  const mivida3   = ql.includes("mi vida")||ql.includes("cigarro")||ql.includes("cigarro 3")||(matchesJunior(ql)&&ql.includes("vida"));
+  const showGata  = ql.includes("gata")||(matchesJunior(ql)&&ql.includes("gata"));
+  const showTeniente  = ql.includes("teniente")||(matchesJunior(ql)&&ql.includes("teniente"));
+  const showChango    = ql.includes("chango")||(matchesJunior(ql)&&ql.includes("chango"));
+  const showTigre     = ql.includes("tigre")||(matchesJunior(ql)&&ql.includes("tigre"));
+  const showCripto    = ql.includes("cripto")||ql.includes("criptomoneda")||ql.includes("jorsshh")||ql.includes("calle 24")||(matchesJunior(ql)&&ql.includes("cripto"));
+  const show000666    = ql.includes("000666")||(matchesJunior(ql)&&ql.includes("666"));
+
+  // broad junior h search — show all his content
+  const juniorBroad = matchesJunior(ql) && !fake && !boveda && !levitico && !mivida3 && !showGata && !showTeniente && !showChango && !showTigre && !showCripto && !show000666;
+
   let fp; try{fp=fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=album&limit=16`);}catch(e){fp=Promise.reject(e);}
   resultsEl.innerHTML=`<div class="sec-label">Results</div><div class="ai-loader"><div class="ai-lbl">N3XT AI — Processing<span class="ai-dots"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></span></div><div class="ai-bar-wrap"><div class="ai-bar" id="ai-bar"></div></div><div class="ai-steps" id="ai-steps"></div></div>`;
   document.getElementById("viewer").innerHTML=`<div class="empty" style="padding:56px 0"><div class="empty-title">Select a result.</div><div class="empty-sub">Tracklist and metadata<br>will appear here.</div></div>`;
@@ -844,24 +929,52 @@ async function doSearch(){
   await new Promise(r=>setTimeout(r,400));
   if(!fr){resultsEl.innerHTML=`<div class="sec-label">Results</div><div class="empty"><div class="empty-title">Search failed.</div><div class="empty-sub">Check your connection and try again.</div></div>`;return;}
   let items=(fr.results||[]).filter((v,i,a)=>a.findIndex(x=>x.collectionId===v.collectionId)===i);
-  lastResultsCache=[items,fake,boveda,levitico,q];
-  renderResults(items,fake,boveda,levitico,q);
+  lastResultsCache=[items,fake,boveda,levitico,q,mivida3,showGata,showTeniente,showChango,showTigre,showCripto,show000666,juniorBroad];
+  renderResults(items,fake,boveda,levitico,q,mivida3,showGata,showTeniente,showChango,showTigre,showCripto,show000666,juniorBroad);
 }
 
-function renderResults(items,injectFake,injectBoveda,injectLevitico,q){
+function renderResults(items,injectFake,injectBoveda,injectLevitico,q,injectMiVida3,injectGata,injectTeniente,injectChango,injectTigre,injectCripto,inject000666,juniorBroad){
   const f=activeFilter;
-  const showFake=injectFake&&(f==="all"||f==="Instagram");
-  const showBoveda=injectBoveda&&(f==="all"||f==="Telegram");
-  const showLevitico=injectLevitico&&(f==="all"||f==="Telegram");
-  const showApple=f==="all"||f==="Apple Music"||f==="YouTube Music"||f==="Spotify";
+  const showFake      = (injectFake||juniorBroad)      && (f==="all"||f==="Instagram");
+  const showBoveda    = injectBoveda                    && (f==="all"||f==="Telegram");
+  const showLevitico  = injectLevitico                  && (f==="all"||f==="Telegram");
+  const showMiVida3   = (injectMiVida3||juniorBroad)   && (f==="all"||f==="Instagram");
+  const showGata      = (injectGata||juniorBroad)       && (f==="all"||f==="Instagram");
+  const showTeniente  = (injectTeniente||juniorBroad)   && (f==="all"||f==="Instagram");
+  const showChango    = (injectChango||juniorBroad)     && (f==="all"||f==="Instagram");
+  const showTigre     = (injectTigre||juniorBroad)     && (f==="all"||f==="Instagram");
+  const showCripto    = (injectCripto||juniorBroad)    && (f==="all"||f==="Instagram");
+  const show000666    = (inject000666||juniorBroad)    && (f==="all"||f==="Instagram");
+  const showApple     = f==="all"||f==="Apple Music"||f==="YouTube Music"||f==="Spotify";
   const filtered=showApple?items:[];
-  const total=filtered.length+(showFake?1:0)+(showBoveda?1:0)+(showLevitico?1:0);
+
+  const injectedCount = [showFake,showBoveda,showLevitico,showMiVida3,showGata,showTeniente,showChango,showTigre,showCripto,show000666].filter(Boolean).length;
+  const total=filtered.length+injectedCount;
   let html=`<div class="sec-label">Results</div><div class="status-line">${total} result${total!==1?"s":""}${f!=="all"?" · "+esc(f):""} — "${esc(q)}"</div>`;
+
   if(!total){html+=`<div class="empty"><div class="empty-title">No results.</div><div class="empty-sub">Try a different search or filter.</div></div>`;resultsEl.innerHTML=html;return;}
+
+  // ── Injected custom entries ─────────────────────────────────────
   if(showFake) html+=`<div class="result-item" onclick="openFake()"><div class="result-thumb-ph"><span>IG</span></div><div class="result-info"><div class="result-name">${esc(fakeAlbum.name)}</div><div class="result-artist">${esc(fakeAlbum.artist)}</div><div class="result-badges"><span class="badge b-ig">Instagram</span></div></div></div>`;
+  if(showMiVida3) html+=`<div class="result-item" onclick="openMiVida3()"><div class="result-thumb-ph"><span>IG</span></div><div class="result-info"><div class="result-name">${esc(mivida3Album.name)}</div><div class="result-artist">${esc(mivida3Album.artist)}</div><div class="result-badges"><span class="badge b-ig">Instagram</span></div></div></div>`;
   if(showBoveda) html+=`<div class="result-item" onclick="openBoveda()"><img class="result-thumb" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy"><div class="result-info"><div class="result-name">${esc(bovedeAlbum.name)}</div><div class="result-artist">${esc(bovedeAlbum.artist)}</div><div class="result-badges"><span class="badge b-tg">Telegram</span></div></div></div>`;
   if(showLevitico) html+=`<div class="result-item" onclick="openLevitico()"><div class="result-thumb-ph"><span>N3XT</span></div><div class="result-info"><div class="result-name">${esc(leviticoAlbum.name)}</div><div class="result-artist">${esc(leviticoAlbum.artist)}</div><div class="result-badges"><span class="badge b-tg">Telegram</span></div></div></div>`;
-  // Apple Music results — show with all 3 platform badges, deduplicate
+
+  // Singles
+  const singlesData = [
+    {show:showGata,    data:gataS,      fn:"openSingleGata"},
+    {show:showTeniente,data:tenienteS,  fn:"openSingleTeniente"},
+    {show:showChango,  data:changoS,    fn:"openSingleChango"},
+    {show:showTigre,   data:tigreS,     fn:"openSingleTigre"},
+    {show:showCripto,  data:criptoS,    fn:"openSingleCripto"},
+    {show:show000666,  data:s000666,    fn:"openSingle000666"},
+  ];
+  singlesData.forEach(({show,data,fn})=>{
+    if(!show)return;
+    html+=`<div class="result-item single-item" onclick="${fn}()"><div class="result-thumb-ph" style="border-radius:50%;width:42px;height:42px"><span>IG</span></div><div class="result-info"><div class="result-name">${esc(data.name)}</div><div class="result-artist">${esc(data.artist)}</div><div class="result-badges"><span class="badge" style="background:linear-gradient(135deg,#fa2d48,#ff6b35);color:#fff">Single</span><span class="badge b-ig">Instagram</span></div></div></div>`;
+  });
+
+  // Apple Music results
   const seen=new Set();
   filtered.forEach((album,idx)=>{
     if(seen.has(album.collectionId))return; seen.add(album.collectionId);
@@ -876,11 +989,19 @@ function renderResults(items,injectFake,injectBoveda,injectLevitico,q){
 
 // ── Globals ───────────────────────────────────────────────────────
 window.openFake=openFake; window.openBoveda=openBoveda; window.openAlbum=openAlbum; window.openLevitico=openLevitico;
+window.openMiVida3=openMiVida3;
+window.openSingleGata    = ()=>openSingle(gataS);
+window.openSingleTeniente= ()=>openSingle(tenienteS);
+window.openSingleChango  = ()=>openSingle(changoS);
+window.openSingleTigre   = ()=>openSingle(tigreS);
+window.openSingleCripto  = ()=>openSingle(criptoS);
+window.openSingle000666  = ()=>openSingle(s000666);
 window.closeChangelog=closeChangelog;
 window.handleLeakedDL=handleLeakedDL; window.simulateDL=simulateDL;
 window.startDL=startDL; window.confirmTrackDL=confirmTrackDL; window.closeModal=closeModal;
 window.playTrack=playTrack; window.playBoveadaTrack=playBoveadaTrack; window.playPreview=playPreview;
 window.stopCurrentAudio=stopCurrentAudio; window.openTOS=openTOS; window.closeTOS=closeTOS;
+window.openSingle=openSingle;
 </script>
 </body>
 </html>
