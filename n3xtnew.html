@@ -864,7 +864,7 @@ themeBtn.addEventListener("click",()=>{dark=!dark;applyTheme();});
 
 // ── Data ───────────────────────────────────────────────────────────
 const fakeAlbum={
-  id:"fake-sad",name:"$AD BOYZ 4 LIFE III",artist:"Junior H",year:"2026",source:"Instagram",cover:"",dlTime:10000,
+  id:"fake-sad",name:"$AD BOYZ 4 LIFE III",artist:"Junior H",year:"2026",source:"Instagram",cover:"https://github.com/Rainfun/rainfun.github.io/blob/well-known/photo_5107148283603258265_x.jpg?raw=true",dlTime:10000,
   tracks:[
     {name:"24K",artist:"Junior H",len:"3:27"},{name:"Fotos Que Borré",artist:"Junior H, Tito Double P",len:"3:16"},
     {name:"Bohemio",artist:"Junior H",len:"2:53"},{name:"Vogue Girl",artist:"Junior H, Chino Pacas",len:"3:51"},
@@ -896,7 +896,7 @@ const leviticoAlbum={
   tracks:[{name:"BELICE",artist:"Peso Pluma & Eslabon Armado & Tito Double P",len:"3:44"}],failedCount:16
 };
 const mivida3Album={
-  id:"fake-mivida3",name:"Mi Vida En Un Cigarro 3",artist:"Junior H",year:"2026",source:"Instagram",cover:"",dlTime:10000,failedCount:14
+  id:"fake-mivida3",name:"Mi Vida En Un Cigarro 3",artist:"Junior H",year:"2026",source:"Instagram",cover:"https://github.com/Rainfun/rainfun.github.io/blob/well-known/photo_5107148283603258266_x.jpg?raw=true",dlTime:10000,failedCount:14
 };
 const gataS     ={id:"s-gata",     name:"GATA",          artist:"Junior H",                       year:"2026",source:"Instagram",isSingle:true};
 const tenienteS ={id:"s-teniente", name:"EL TENIENTE",   artist:"Junior H & Gael Valenzuela",     year:"2026",source:"Instagram",isSingle:true};
@@ -1058,7 +1058,7 @@ function openLevitico(){
 function openMiVida3(){
   stopCurrentAudio();
   document.getElementById("viewer").innerHTML=`
-    <div class="viewer-cover-ph"><span data-lucide="disc-3"></span></div>
+    ${mivida3Album.cover?`<img class="viewer-cover" src="${mivida3Album.cover}" alt="" loading="lazy">`:`<div class="viewer-cover-ph"><span data-lucide="disc-3"></span></div>`}
     <div class="viewer-title">${esc(mivida3Album.name)}</div>
     <div class="viewer-artist">${esc(mivida3Album.artist)}</div>
     <div class="meta-pills">
@@ -1120,7 +1120,7 @@ function openFake(){
       <span class="track-dur">${esc(t.len)}</span>
     </div>`).join("");
   document.getElementById("viewer").innerHTML=`
-    <div class="viewer-cover-ph"><span data-lucide="disc-3"></span></div>
+    ${fakeAlbum.cover?`<img class="viewer-cover" src="${fakeAlbum.cover}" alt="" loading="lazy">`:`<div class="viewer-cover-ph"><span data-lucide="disc-3"></span></div>`}
     <div class="viewer-title">${esc(fakeAlbum.name)}</div>
     <div class="viewer-artist">${icon("user")} ${esc(fakeAlbum.artist)}</div>
     <div class="meta-pills">
@@ -1494,8 +1494,8 @@ function renderResults(items,injectFake,injectBoveda,injectLevitico,q,injectMiVi
   const phThumb=`<div class="result-thumb-ph">N3XT</div>`;
   const phCircle=`<div class="result-thumb-ph circle"></div>`;
 
-  if(showFake) html+=resultRow(phThumb,fakeAlbum.name,fakeAlbum.artist,`<span class="badge b-ig">Instagram</span>`,"openFake()");
-  if(showMiVida3) html+=resultRow(phThumb,mivida3Album.name,mivida3Album.artist,`<span class="badge b-ig">Instagram</span>`,"openMiVida3()");
+  if(showFake) html+=resultRow(fakeAlbum.cover?`<img class="result-thumb" src="${fakeAlbum.cover}" alt="" loading="lazy">`:phThumb,fakeAlbum.name,fakeAlbum.artist,`<span class="badge b-ig">Instagram</span>`,"openFake()");
+  if(showMiVida3) html+=resultRow(mivida3Album.cover?`<img class="result-thumb" src="${mivida3Album.cover}" alt="" loading="lazy">`:phThumb,mivida3Album.name,mivida3Album.artist,`<span class="badge b-ig">Instagram</span>`,"openMiVida3()");
   if(showBoveda) html+=resultRow(`<img class="result-thumb" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy">`,bovedeAlbum.name,bovedeAlbum.artist,`<span class="badge b-tg">Telegram</span>`,"openBoveda()");
   if(showLevitico) html+=resultRow(phThumb,leviticoAlbum.name,leviticoAlbum.artist,`<span class="badge b-tg">Telegram</span>`,"openLevitico()");
 
