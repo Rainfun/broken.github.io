@@ -991,10 +991,9 @@ function playTrack(btn,name,idx){
 
 function playFotos(btn,name){
   setPlayingBtn(btn);currentPlayBtn=btn;showNP(name,"Junior H");
-  showNotif("Preview Only",`"${name}" — this is a preview only. Full song requires authorization.`,"err");
   const a=new Audio(FOTOS_URL);currentAudio=a;
   a.play().catch(()=>{showNotif("Playback Error",`Could not load "${name}".`,"err");resetPlayBtn(btn);currentPlayBtn=null;currentAudio=null;hideNP();});
-  a.addEventListener("ended",()=>{resetPlayBtn(btn);currentPlayBtn=null;currentAudio=null;hideNP();showNotif("Preview Ended",`"${name}" — preview has ended.`,"ok");},{once:true});
+  a.addEventListener("ended",()=>{resetPlayBtn(btn);currentPlayBtn=null;currentAudio=null;hideNP();},{once:true});
 }
 
 function playBoveadaTrack(btn,name,idx){
@@ -1363,11 +1362,27 @@ function runProgress(type){
       closeModal();
       if(!isSong){
         const mob=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        const ZIP="https://github.com/Rainfun/Pulse/raw/refs/heads/main/n3xt.github.io%20$AD%20BOYZ%204%20LIFE%20III.zip";
-        showNotif("Download Complete",`"${albumName}" — downloaded successfully.`,"ok");
-        if(mob){window.location.href=ZIP;}
-        else{fetch(ZIP).then(r=>r.blob()).then(blob=>{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="$AD BOYZ 4 LIFE III.zip";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);}).catch(()=>window.open(ZIP,"_blank"));}
-      }else{showNotif("Download Failed",`"${songName}" — transfer error. File could not be retrieved.`,"err");}
+        const albumDLMap={
+          "$AD BOYZ 4 LIFE III":"https://github.com/Rainfun/Pulse/raw/refs/heads/main/n3xt.github.io%20$AD%20BOYZ%204%20LIFE%20III.zip"
+        };
+        const dlUrl=albumDLMap[albumName];
+        if(dlUrl){
+          const fname=albumName+".zip";
+          showNotif("Download Complete",`"${albumName}" — downloaded successfully.`,"ok");
+          if(mob){window.location.href=dlUrl;}
+          else{fetch(dlUrl).then(r=>r.blob()).then(blob=>{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fname;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);}).catch(()=>window.open(dlUrl,"_blank"));}
+        }else{
+          showNotif("Download Failed",`"${albumName}" — connection lost during transfer. Please try again later.`,"err");
+        }
+      }else{
+        const FOTOS_DL="https://github.com/Rainfun/rainfun.github.io/raw/refs/heads/well-known/FOTOS%20QUE%20BORRE.mp3";
+        if(songName==="Fotos Que Borré"){
+          showNotif("Download Complete",`"${songName}" — downloaded successfully.`,"ok");
+          const mob=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          if(mob){window.location.href=FOTOS_DL;}
+          else{fetch(FOTOS_DL).then(r=>r.blob()).then(blob=>{const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="Fotos Que Borré.mp3";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),10000);}).catch(()=>window.open(FOTOS_DL,"_blank"));}
+        }else{showNotif("Download Failed",`"${songName}" — transfer error. File could not be retrieved.`,"err");}
+      }
     },500);
   },totalMs);
 }
