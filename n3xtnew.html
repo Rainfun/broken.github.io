@@ -649,11 +649,7 @@ img{display:block}
         <span data-lucide="scroll-text"></span>
         Terms
       </button>
-      <button class="nav-btn" onclick="openDMCA()" style="color:#c00;border-color:rgba(200,0,0,.3)">
-        <span data-lucide="shield-alert"></span>
-        DMCA
-      </button>
-      <button class="nav-btn" onclick="openDMCA()" style="color:#e53e3e">
+      <button class="nav-btn" onclick="openDMCAForm()">
         <span data-lucide="shield-alert"></span>
         DMCA
       </button>
@@ -844,26 +840,9 @@ img{display:block}
   </div>
 </div>
 
-<div class="overlay" id="dmca-modal">
-  <div class="mbox">
-    <div class="micon"><span data-lucide="shield-alert" style="color:#e53e3e"></span></div>
-    <div class="mtitle">DMCA Takedowns</div>
-    <div class="tos-body">
-      <p>The following content has been subject to DMCA takedown requests received by N3XT. We comply with all valid copyright claims in accordance with the Digital Millennium Copyright Act.</p>
-      <h3>Takedown Notice — LA BOVEDA</h3>
-      <p><strong>Album:</strong> LA BOVEDA<br><strong>Artist:</strong> Natanael Cano<br><strong>Claimant:</strong> Rancho Humilde<br><strong>Date:</strong> 2026<br><strong>Status:</strong> <span style="color:#e53e3e;font-weight:700">TAKEN DOWN</span></p>
-      <p>This content has been removed from N3XT following a valid DMCA takedown request filed by Rancho Humilde. The album, tracklist, and all associated audio files are no longer accessible on this platform.</p>
-      <p>If you believe this takedown was issued in error, you may file a counter-notice with N3XT. N3XT is not responsible for the content of third-party takedown requests.</p>
-      <h3>Submit a Takedown</h3>
-      <p>If you are a rights holder and believe your content is being distributed on N3XT without authorization, please contact us to submit a DMCA takedown request.</p>
-    </div>
-    <button class="tos-ok" onclick="closeDMCA()"><span data-lucide="check"></span> Close</button>
-  </div>
-</div>
-
 <div id="notif-stack"></div>
 
-<!-- DMCA Modal -->
+<!-- LA BOVEDA DMCA Notice Modal -->
 <div class="overlay" id="dmca-modal">
   <div class="mbox" style="max-width:480px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -901,6 +880,38 @@ img{display:block}
     <button class="tos-ok" style="background:#c00;border-color:#c00" onclick="closeDMCA()">
       <span data-lucide="check"></span> I Understand
     </button>
+  </div>
+</div>
+
+<!-- DMCA Submission Form Modal -->
+<div class="overlay" id="dmca-form-modal">
+  <div class="mbox" style="max-width:460px">
+    <div class="micon"><span data-lucide="shield-alert"></span></div>
+    <div class="mtitle">Submit a DMCA Takedown</div>
+    <div class="mbody">If you are a rights holder and believe your content is being distributed on N3XT without your authorization, complete the form below. We review all valid requests and comply with the Digital Millennium Copyright Act.</div>
+    <div id="dmca-form-fields">
+      <input class="minput" id="dmca-name" type="text" placeholder="Your full legal name *" autocomplete="off" style="margin-bottom:8px">
+      <input class="minput" id="dmca-email" type="email" placeholder="Contact email address *" autocomplete="off" style="margin-bottom:8px">
+      <input class="minput" id="dmca-company" type="text" placeholder="Company / label name (if applicable)" autocomplete="off" style="margin-bottom:8px">
+      <input class="minput" id="dmca-content" type="text" placeholder="Album or track title *" autocomplete="off" style="margin-bottom:8px">
+      <input class="minput" id="dmca-artist" type="text" placeholder="Artist name *" autocomplete="off" style="margin-bottom:8px">
+      <textarea class="minput" id="dmca-desc" placeholder="Describe the infringement and your rights to this content *" rows="3" style="height:auto;padding:10px 14px;resize:vertical;margin-bottom:8px"></textarea>
+      <label style="display:flex;align-items:flex-start;gap:9px;font-size:11px;color:var(--fg2);line-height:1.5;cursor:pointer;margin-bottom:14px">
+        <input type="checkbox" id="dmca-sworn" style="margin-top:2px;flex-shrink:0">
+        I declare under penalty of perjury that the information above is accurate and that I am the rights holder or authorized to act on their behalf.
+      </label>
+      <div class="merr" id="dmca-form-err"></div>
+      <div class="mbtns">
+        <button class="msubmit" onclick="submitDMCAForm()"><span data-lucide="send"></span> Submit Request</button>
+        <button class="mcancel" onclick="closeDMCAForm()">Cancel</button>
+      </div>
+    </div>
+    <div id="dmca-form-success" style="display:none;text-align:center;padding:12px 0">
+      <div style="font-size:32px;margin-bottom:12px">✅</div>
+      <div style="font-size:16px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px">Request Received</div>
+      <div style="font-size:12px;color:var(--fg2);line-height:1.65;margin-bottom:20px">Your DMCA takedown request has been submitted. Our team will review it within 3–5 business days and respond to the email you provided.</div>
+      <button class="tos-ok" onclick="closeDMCAForm()"><span data-lucide="check"></span> Done</button>
+    </div>
   </div>
 </div>
 
@@ -992,14 +1003,29 @@ function showNotif(title,body,type="err"){
 
 // ── TOS ────────────────────────────────────────────────────────────
 function openTOS(){document.getElementById("tos-modal").classList.add("on");}
+function closeTOS(){document.getElementById("tos-modal").classList.remove("on");}
 function openDMCA(){document.getElementById("dmca-modal").classList.add("on");reIcons();}
 function closeDMCA(){document.getElementById("dmca-modal").classList.remove("on");}
-function closeTOS(){document.getElementById("tos-modal").classList.remove("on");}
-function openDMCA(){document.getElementById("dmca-modal").classList.add("on");}
-function closeDMCA(){document.getElementById("dmca-modal").classList.remove("on");}
-document.getElementById("dmca-modal").addEventListener("click",e=>{if(e.target===document.getElementById("dmca-modal"))closeDMCA();});
+function openDMCAForm(){const m=document.getElementById("dmca-form-modal");m.classList.add("on");document.getElementById("dmca-form-fields").style.display="";document.getElementById("dmca-form-success").style.display="none";document.getElementById("dmca-form-err").textContent="";reIcons();}
+function closeDMCAForm(){document.getElementById("dmca-form-modal").classList.remove("on");}
+function submitDMCAForm(){
+  const name=document.getElementById("dmca-name").value.trim();
+  const email=document.getElementById("dmca-email").value.trim();
+  const content=document.getElementById("dmca-content").value.trim();
+  const artist=document.getElementById("dmca-artist").value.trim();
+  const desc=document.getElementById("dmca-desc").value.trim();
+  const sworn=document.getElementById("dmca-sworn").checked;
+  const err=document.getElementById("dmca-form-err");
+  if(!name||!email||!content||!artist||!desc){err.textContent="Please fill in all required fields.";return;}
+  if(!sworn){err.textContent="You must confirm the sworn declaration.";return;}
+  err.textContent="";
+  document.getElementById("dmca-form-fields").style.display="none";
+  document.getElementById("dmca-form-success").style.display="";
+  reIcons();
+}
 document.getElementById("tos-modal").addEventListener("click",e=>{if(e.target===document.getElementById("tos-modal"))closeTOS();});
 document.getElementById("dmca-modal").addEventListener("click",e=>{if(e.target===document.getElementById("dmca-modal"))closeDMCA();});
+document.getElementById("dmca-form-modal").addEventListener("click",e=>{if(e.target===document.getElementById("dmca-form-modal"))closeDMCAForm();});
 
 // ── Filters ────────────────────────────────────────────────────────
 let activeFilter="all",lastResultsCache=null;
@@ -1629,7 +1655,7 @@ window.closeChangelog=closeChangelog;
 window.handleLeakedDL=handleLeakedDL;window.simulateDL=simulateDL;
 window.startDL=startDL;window.confirmTrackDL=confirmTrackDL;window.closeModal=closeModal;
 window.playTrack=playTrack;window.playBoveadaTrack=playBoveadaTrack;window.playPreview=playPreview;
-window.stopCurrentAudio=stopCurrentAudio;window.openTOS=openTOS;window.closeTOS=closeTOS;window.openDMCA=openDMCA;window.closeDMCA=closeDMCA;window.openDMCA=openDMCA;window.closeDMCA=closeDMCA;
+window.stopCurrentAudio=stopCurrentAudio;window.openTOS=openTOS;window.closeTOS=closeTOS;window.openDMCA=openDMCA;window.closeDMCA=closeDMCA;window.openDMCAForm=openDMCAForm;window.closeDMCAForm=closeDMCAForm;window.submitDMCAForm=submitDMCAForm;
 </script>
 </body>
 </html>
