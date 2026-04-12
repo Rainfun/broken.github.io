@@ -649,6 +649,14 @@ img{display:block}
         <span data-lucide="scroll-text"></span>
         Terms
       </button>
+      <button class="nav-btn" onclick="openDMCA()" style="color:#c00;border-color:rgba(200,0,0,.3)">
+        <span data-lucide="shield-alert"></span>
+        DMCA
+      </button>
+      <button class="nav-btn" onclick="openDMCA()" style="color:#e53e3e">
+        <span data-lucide="shield-alert"></span>
+        DMCA
+      </button>
       <button class="icon-btn" id="theme-btn" title="Toggle theme">
         <span data-lucide="moon"></span>
       </button>
@@ -836,7 +844,65 @@ img{display:block}
   </div>
 </div>
 
+<div class="overlay" id="dmca-modal">
+  <div class="mbox">
+    <div class="micon"><span data-lucide="shield-alert" style="color:#e53e3e"></span></div>
+    <div class="mtitle">DMCA Takedowns</div>
+    <div class="tos-body">
+      <p>The following content has been subject to DMCA takedown requests received by N3XT. We comply with all valid copyright claims in accordance with the Digital Millennium Copyright Act.</p>
+      <h3>Takedown Notice — LA BOVEDA</h3>
+      <p><strong>Album:</strong> LA BOVEDA<br><strong>Artist:</strong> Natanael Cano<br><strong>Claimant:</strong> Rancho Humilde<br><strong>Date:</strong> 2026<br><strong>Status:</strong> <span style="color:#e53e3e;font-weight:700">TAKEN DOWN</span></p>
+      <p>This content has been removed from N3XT following a valid DMCA takedown request filed by Rancho Humilde. The album, tracklist, and all associated audio files are no longer accessible on this platform.</p>
+      <p>If you believe this takedown was issued in error, you may file a counter-notice with N3XT. N3XT is not responsible for the content of third-party takedown requests.</p>
+      <h3>Submit a Takedown</h3>
+      <p>If you are a rights holder and believe your content is being distributed on N3XT without authorization, please contact us to submit a DMCA takedown request.</p>
+    </div>
+    <button class="tos-ok" onclick="closeDMCA()"><span data-lucide="check"></span> Close</button>
+  </div>
+</div>
+
 <div id="notif-stack"></div>
+
+<!-- DMCA Modal -->
+<div class="overlay" id="dmca-modal">
+  <div class="mbox" style="max-width:480px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span data-lucide="shield-alert" style="width:28px;height:28px;color:#c00;flex-shrink:0"></span>
+      <div class="mtitle" style="margin-bottom:0;color:#c00">DMCA Takedown Notice</div>
+    </div>
+    <div class="tos-body" style="max-height:60vh">
+      <p style="font-weight:600;color:var(--fg)">Effective immediately — LA BOVEDA by Natanael Cano has been removed from N3XT.</p>
+
+      <h3>What happened?</h3>
+      <p>We received an official DMCA (Digital Millennium Copyright Act) takedown request regarding the album <strong>LA BOVEDA</strong> by <strong>Natanael Cano</strong>. The request was filed by <strong>LOS CT</strong>, the rights holders and management behind the artist.</p>
+
+      <h3>Who filed the request?</h3>
+      <p><strong>LOS CT</strong> — the official label and management team representing Natanael Cano — submitted a formal copyright infringement notice claiming that the distribution of LA BOVEDA through N3XT violated their exclusive rights under 17 U.S.C. § 512(c) of the Digital Millennium Copyright Act.</p>
+
+      <h3>What content was affected?</h3>
+      <p>The following content has been fully removed from N3XT as a result of this notice:</p>
+      <p>· Album: <strong>LA BOVEDA</strong> — Natanael Cano (2026)<br>
+      · All 18 tracks including audio previews and metadata<br>
+      · Cover art and any associated promotional material<br>
+      · Download access previously granted to authorized users</p>
+
+      <h3>Why did this happen?</h3>
+      <p>LA BOVEDA was an unreleased album that had been circulating through unofficial Telegram channels before its official release. N3XT sourced this content from those community channels in good faith for informational purposes. However, upon receiving the DMCA notice from LOS CT, we are legally obligated to remove the content immediately and comply fully with the request.</p>
+
+      <h3>Our response</h3>
+      <p>N3XT takes copyright law seriously. We have fully complied with the takedown request and removed all associated content within the legally required timeframe. We do not contest this notice.</p>
+
+      <h3>A message from N3XT</h3>
+      <p>We sincerely apologize to our users who were accessing LA BOVEDA through our platform. We understand this is disappointing, especially for fans of Natanael Cano. We also apologize to LOS CT and Natanael Cano for any harm caused by the unauthorized distribution of this content. This was not our intention, and we are committed to respecting the rights of all artists and their teams.</p>
+      <p>If you believe this removal was made in error or wish to submit a counter-notice, please contact us directly.</p>
+
+      <p style="font-size:11px;color:var(--fg4);margin-top:14px">Reference: DMCA §512(c) · Filed by: LOS CT · Content removed: LA BOVEDA (2026)</p>
+    </div>
+    <button class="tos-ok" style="background:#c00;border-color:#c00" onclick="closeDMCA()">
+      <span data-lucide="check"></span> I Understand
+    </button>
+  </div>
+</div>
 
 <script>
 // ── Init Lucide Icons ──────────────────────────────────────────────
@@ -926,8 +992,14 @@ function showNotif(title,body,type="err"){
 
 // ── TOS ────────────────────────────────────────────────────────────
 function openTOS(){document.getElementById("tos-modal").classList.add("on");}
+function openDMCA(){document.getElementById("dmca-modal").classList.add("on");reIcons();}
+function closeDMCA(){document.getElementById("dmca-modal").classList.remove("on");}
 function closeTOS(){document.getElementById("tos-modal").classList.remove("on");}
+function openDMCA(){document.getElementById("dmca-modal").classList.add("on");}
+function closeDMCA(){document.getElementById("dmca-modal").classList.remove("on");}
+document.getElementById("dmca-modal").addEventListener("click",e=>{if(e.target===document.getElementById("dmca-modal"))closeDMCA();});
 document.getElementById("tos-modal").addEventListener("click",e=>{if(e.target===document.getElementById("tos-modal"))closeTOS();});
+document.getElementById("dmca-modal").addEventListener("click",e=>{if(e.target===document.getElementById("dmca-modal"))closeDMCA();});
 
 // ── Filters ────────────────────────────────────────────────────────
 let activeFilter="all",lastResultsCache=null;
@@ -1138,28 +1210,25 @@ function openFake(){
 // ── Viewer: Boveda ─────────────────────────────────────────────────
 function openBoveda(){
   stopCurrentAudio();
-  const rows=bovedeAlbum.tracks.map((t,i)=>`
-    <div class="track" style="animation-delay:${i*.025}s">
-      ${pbHTML()}
-      <span class="track-no">${i+1}</span>
-      <div class="track-info"><div class="track-name">${esc(t.name)}</div><div class="track-sub">${esc(t.artist)}</div></div>
-      <span class="track-dur">${esc(t.len)}</span>
-    </div>`).join("");
   document.getElementById("viewer").innerHTML=`
-    <img class="viewer-cover" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy">
-    <div class="viewer-title">${esc(bovedeAlbum.name)}</div>
-    <div class="viewer-artist">${icon("user")} ${esc(bovedeAlbum.artist)}</div>
-    <div class="meta-pills">
-      <span class="mpill" style="background:#2ca5e0;color:#fff">Telegram</span>
-      <span class="mpill">${esc(bovedeAlbum.year)}</span>
-      <span class="mpill">${bovedeAlbum.tracks.length} tracks</span>
-    </div>
-    <button class="dl-btn" onclick="handleLeakedDL(bovedeAlbum)">${icon("download")} Download Album</button>
-    <div class="tl-label">Tracklist</div>${rows}`;
+    <div style="animation:fadeUp .35s ease both">
+      <img class="viewer-cover" src="${esc(bovedeAlbum.cover)}" alt="" loading="lazy" style="filter:grayscale(1);opacity:.5">
+      <div class="viewer-title" style="opacity:.5">${esc(bovedeAlbum.name)}</div>
+      <div class="viewer-artist" style="opacity:.5">${icon("user")} ${esc(bovedeAlbum.artist)}</div>
+      <div style="margin:20px 0 12px;padding:16px;border-radius:12px;background:rgba(229,62,62,.1);border:1px solid rgba(229,62,62,.3)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span data-lucide="shield-alert" style="width:18px;height:18px;color:#e53e3e;flex-shrink:0"></span>
+          <span style="font-size:13px;font-weight:700;color:#e53e3e;letter-spacing:.02em">DMCA Takedown</span>
+        </div>
+        <div style="font-size:12px;color:var(--fg2);line-height:1.65">
+          This album has been taken down following a DMCA request filed by <strong style="color:var(--fg)">Rancho Humilde</strong>. The content is no longer available on N3XT.
+        </div>
+        <button onclick="openDMCA()" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:20px;background:rgba(229,62,62,.15);border:1px solid rgba(229,62,62,.4);color:#e53e3e;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s">
+          <span data-lucide="external-link" style="width:11px;height:11px"></span> View DMCA Notice
+        </button>
+      </div>
+    </div>`;
   reIcons();
-  document.querySelectorAll(".track .play-btn").forEach((btn,i)=>{
-    btn.addEventListener("click",function(){playBoveadaTrack(this,bovedeAlbum.tracks[i].name,i);});
-  });
 }
 
 // ── Viewer: Apple Music ────────────────────────────────────────────
@@ -1560,7 +1629,7 @@ window.closeChangelog=closeChangelog;
 window.handleLeakedDL=handleLeakedDL;window.simulateDL=simulateDL;
 window.startDL=startDL;window.confirmTrackDL=confirmTrackDL;window.closeModal=closeModal;
 window.playTrack=playTrack;window.playBoveadaTrack=playBoveadaTrack;window.playPreview=playPreview;
-window.stopCurrentAudio=stopCurrentAudio;window.openTOS=openTOS;window.closeTOS=closeTOS;
+window.stopCurrentAudio=stopCurrentAudio;window.openTOS=openTOS;window.closeTOS=closeTOS;window.openDMCA=openDMCA;window.closeDMCA=closeDMCA;window.openDMCA=openDMCA;window.closeDMCA=closeDMCA;
 </script>
 </body>
 </html>
